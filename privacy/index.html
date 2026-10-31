@@ -156,6 +156,10 @@
   <p>A one-way hash of your account id, the same value for every purchase from that account, passed to Google Play as the obfuscated account id.</p>
   <p class="tag">Why: tie a purchase to the right account without giving Google your game id. Only if you buy.</p>
 
+  <h3>Unity IAP purchase telemetry (only if you start a purchase)</h3>
+  <p>When you start a purchase, the Unity In-App Purchasing package (5.4.3) sends purchase start/paid/failed/fulfilled events to Unity Technologies at <code>https://prd.insights.analytics.unity3d.com</code>. Every event carries the product/SKU, price and currency, quantity, the device model, OS version, system language and locale list, boot time, total cache space, app bundle id and version, Unity and IAP versions, install time and install mode, a random Unity installation id and a session id. The paid/fulfilled event also carries the Google order id, the purchase token, and the Google order JSON (which can include the account tag) and signature; a failed event carries the failure reason and message. It is the SDK's own telemetry, not our game analytics. No advertising id is sent (this build has no ads consent).</p>
+  <p class="tag">Why: operate the purchase SDK, fraud prevention and product analytics. Only if you start a purchase. There is no in-app switch; the project-level Unity Developer Data setting can stop it.</p>
+
   <h3>Clan and world chat</h3>
   <p>Message text, sender account and Nakama user id, channel, time, a filtered/normalised copy, the masked original, severity, filter version and delivery status. Kept 30 days, then deleted. A reported message and up to five lines before it are frozen until a moderator closes the case, then deleted within 30 days after closing.</p>
   <p class="tag">Why: clan and world talk; safety and moderation. Optional.</p>
@@ -201,7 +205,7 @@
 
 <section id="why">
   <h2>3. Why we use it</h2>
-  <p>Our own database; no third-party analytics SDK. Events: account created (country, age band); session start (created flag, and platform/app version only if the app sends them); tutorial step (step id, skipped yes/no); battles (type, stars, destruction, loot, trophies, duration); building and Town Hall upgrades; currency earned/spent (currency, source, amount); shop purchase start/complete/fail/refund (offer, price, gems, test flag); clan create/join/leave/transfer; war signup/attack/result/chest claim; island release/fresh claim; account ban/unban and account recovered; error codes and latency buckets. There is no session-end or shop-view event.</p>
+  <p>Our own database; the game itself has no third-party analytics SDK. The purchase flow is the exception: Unity IAP sends its own purchase events to Unity Technologies (section 2); we do not receive that copy. Events: account created (country, age band); session start (created flag, and platform/app version only if the app sends them); tutorial step (step id, skipped yes/no); battles (type, stars, destruction, loot, trophies, duration); building and Town Hall upgrades; currency earned/spent (currency, source, amount); shop purchase start/complete/fail/refund (offer, price, gems, test flag); clan create/join/leave/transfer; war signup/attack/result/chest claim; island release/fresh claim; account ban/unban and account recovered; error codes and latency buckets. There is no session-end or shop-view event.</p>
   <p>Events carry no IP, display name, birth date or chat text, but they do carry the account id, the device hash and a session id. Raw events are kept 13 months, then only daily totals without identifiers remain. Server facts (battles, purchases, clan/war/island actions, errors) are written to the same table and are not stopped by the usage switch.</p>
   <p><strong>Usage switch:</strong> Settings → Account → Privacy → "Send gameplay statistics" (on by default). Off stops the client usage events (tutorial steps and latency buckets) and stops the local anonymous telemetry log. Server facts such as battles, purchases, clan/war actions and errors continue; they are part of your account's game records.</p>
 </section>
@@ -217,6 +221,8 @@
     <dd>13 months, then daily totals without identifiers.</dd>
     <dt>Purchase records</dt>
     <dd><code>iap_purchases</code>: while the account exists; after deletion, under a random tombstone for 5 years (default 1825 days), then a daily job deletes them. <code>transaction_log</code> and <code>lucbao_ledger</code> money rows are also kept indefinitely under the tombstone for accounting and are not removed by that job.</dd>
+    <dt>Unity IAP purchase telemetry</dt>
+    <dd>Not stored by us. Unity Technologies receives it when you start a purchase and keeps it under its Developer Data terms. We can forward a deletion request; the project-level Unity Developer Data setting can stop collection.</dd>
     <dt>Network and device rows, sign-in sessions</dt>
     <dd>One row per network/device seen, with the last-seen date, while the account exists; the alt guard compares only rows seen in the last 7 days. Sessions: 30 days each, newest 10. All deleted with the account.</dd>
     <dt>Ban record and device block</dt>
@@ -254,6 +260,7 @@
     <li><strong>Us</strong>, the individual developer who publishes Godsiege, for support, safety, moderation and bug fixing. Admin access is only through a private tunnel with a key.</li>
     <li><strong>Our processors:</strong> the server host in Singapore, Cloudflare (traffic protection) and our offsite backup storage. They act on our instructions.</li>
     <li><strong>Google Play Billing</strong> for purchases, under Google's own policy. We receive the order data and verify the purchase token with Google; we never see your card.</li>
+    <li><strong>Unity Technologies</strong> for the purchase events the Unity IAP package sends when you start a purchase (product, price, order id/purchase token, device and app info), under Unity's Developer Data framework. We do not receive this copy.</li>
     <li><strong>Google Play Games</strong>, only if you link it: it receives the serverAuthCode and returns your player id; we keep only its hash.</li>
     <li><strong>Google Firebase Cloud Messaging</strong>, only if push is on and you allow it: it receives your push token and the notification text to deliver it to your phone, as our service provider, under Google's own policy.</li>
     <li><strong>Nakama</strong> runs on our own server, not at a third party. It is the social server for clans, chat, trophies and war notices.</li>
@@ -330,6 +337,7 @@
   <p><strong>What is kept, and why:</strong></p>
   <ul>
     <li><strong>Purchases:</strong> <code>iap_purchases</code> under a random tombstone id for 5 years (1825 days), then a daily job deletes them. Reason: tax, refunds and accounting.</li>
+    <li><strong>Unity IAP purchase telemetry:</strong> not held by us. Unity Technologies' copy is not deleted by our purge; see section 4.</li>
     <li><strong>Money ledger:</strong> <code>transaction_log</code> and <code>lucbao_ledger</code> rows under the tombstone, for accounting. They are kept indefinitely; the purchase-retention job does not remove these rows today.</li>
     <li><strong>War and island history:</strong> war members, attacks, results, chest claims, island battles and weekly clan points stay under the tombstone. The village save copy is cleared, and the battle army/result and island snapshot/command/stream fields are cleared where the purge can; war-member base snapshots and war-attack command/stream rows can remain. These rows carry a random tombstone, not your account id. Reason: game history and fairness for the other clan.</li>
     <li><strong>Battle replays:</strong> battle id, replay/offense text, content version and date. Replays contain layout, troops and commands, no account id or name. Reason: game history.</li>
@@ -356,7 +364,7 @@
     <li><code>recovery-created.txt</code>: when a recovery code was made.</li>
     <li><code>online.flag</code>: whether online play is on (development and playtest builds).</li>
     <li><code>telemetry/</code>: an anonymous local log (at most 7 days and 5 MB) with a random install id, a session id, event names, game parameters, device model, RAM, OS, screen size/dpi, language, app version and filtered error records (exception type, a one-way fingerprint and up to five stack frames). It is never uploaded. The same switch as the usage switch turns it off; off also deletes the folder.</li>
-    <li>Unity PlayerPrefs: the telemetry install id, first-seen time, opt-in flag and first-time event flags.</li>
+    <li>Unity PlayerPrefs: the telemetry install id, first-seen time, opt-in flag and first-time event flags, plus the Unity Services installation id and session id (<code>unity_connect.installation_id</code>, <code>unity_connect.session_id</code>) used by the IAP package. The game does not read these two ids.</li>
   </ul>
   <p>The PC build's local files are listed in the offline policy.</p>
   <p>Deleting your online account does not delete these files. Clear the app's data or uninstall the game to remove them.</p>
@@ -453,6 +461,10 @@
   <p>Một bản băm một chiều của mã tài khoản, giống nhau cho mọi lần mua từ tài khoản đó, gửi cho Google Play làm mã tài khoản ẩn danh.</p>
   <p class="tag">Vì sao: gắn giao dịch với đúng tài khoản mà không đưa mã game của bạn cho Google. Chỉ khi bạn mua.</p>
 
+  <h3>Dữ liệu đo lường mua hàng của Unity IAP (chỉ khi bạn bắt đầu mua)</h3>
+  <p>Khi bạn bắt đầu mua, gói Unity In-App Purchasing (5.4.3) gửi các sự kiện bắt đầu mua/đã trả/thất bại/hoàn tất tới Unity Technologies tại <code>https://prd.insights.analytics.unity3d.com</code>. Mỗi sự kiện gồm sản phẩm/SKU, giá và đơn vị tiền, số lượng, mẫu máy, phiên bản hệ điều hành, ngôn ngữ và danh sách locale, thời điểm khởi động máy, dung lượng bộ nhớ đệm, mã gói và phiên bản app, phiên bản Unity và IAP, thời điểm và kiểu cài đặt, một mã cài đặt Unity ngẫu nhiên và một mã phiên. Sự kiện đã trả/hoàn tất còn có mã đơn hàng Google, mã mua hàng, JSON đơn hàng Google (có thể chứa thẻ tài khoản) và chữ ký; sự kiện thất bại có lý do và nội dung lỗi. Đây là dữ liệu đo lường của SDK, không phải thống kê game của chúng tôi. Không gửi mã quảng cáo (bản này không có sự đồng ý quảng cáo).</p>
+  <p class="tag">Vì sao: vận hành SDK mua hàng, chống gian lận và thống kê sản phẩm. Chỉ khi bạn bắt đầu mua. Không có công tắc trong game; cài đặt Unity Developer Data ở cấp dự án có thể tắt.</p>
+
   <h3>Chat bang và chat thế giới</h3>
   <p>Nội dung tin, mã tài khoản và mã người dùng Nakama của người gửi, kênh, thời gian, bản đã lọc/chuẩn hóa, bản gốc đã che, mức độ, phiên bản bộ lọc và trạng thái gửi. Giữ 30 ngày rồi xóa. Tin bị báo cáo và tối đa 5 dòng trước đó được giữ đến khi kiểm duyệt viên đóng hồ sơ, sau đó xóa trong 30 ngày.</p>
   <p class="tag">Vì sao: trò chuyện bang và thế giới; an toàn và kiểm duyệt. Tùy chọn.</p>
@@ -498,7 +510,7 @@
 
 <section id="vi-why">
   <h2>3. Vì sao chúng tôi dùng dữ liệu</h2>
-  <p>Cơ sở dữ liệu của chính chúng tôi; không có SDK thống kê của bên thứ ba. Sự kiện: tạo tài khoản (quốc gia, nhóm tuổi); bắt đầu phiên (cờ tạo mới, và nền tảng/phiên bản app chỉ khi app gửi); bước hướng dẫn (mã bước, bỏ qua hay không); trận đánh (loại, sao, mức phá hủy, chiến lợi phẩm, cúp, thời lượng); nâng cấp công trình và Thị Chính; tài nguyên kiếm/tiêu (loại, nguồn, số lượng); mua hàng trong shop bắt đầu/hoàn tất/thất bại/hoàn tiền (ưu đãi, giá, Kim Cương, cờ thử nghiệm); bang tạo/tham gia/rời/chuyển; chiến bang đăng ký/đánh/kết quả/nhận rương; đảo nhả/chiếm mới; khóa/gỡ khóa tài khoản và khôi phục tài khoản; mã lỗi và nhóm độ trễ. Không có sự kiện kết thúc phiên hay xem shop.</p>
+  <p>Cơ sở dữ liệu của chính chúng tôi; bản thân game không có SDK thống kê của bên thứ ba. Ngoại lệ là luồng mua hàng: Unity IAP gửi sự kiện mua hàng của nó cho Unity Technologies (mục 2); chúng tôi không nhận bản đó. Sự kiện: tạo tài khoản (quốc gia, nhóm tuổi); bắt đầu phiên (cờ tạo mới, và nền tảng/phiên bản app chỉ khi app gửi); bước hướng dẫn (mã bước, bỏ qua hay không); trận đánh (loại, sao, mức phá hủy, chiến lợi phẩm, cúp, thời lượng); nâng cấp công trình và Thị Chính; tài nguyên kiếm/tiêu (loại, nguồn, số lượng); mua hàng trong shop bắt đầu/hoàn tất/thất bại/hoàn tiền (ưu đãi, giá, Kim Cương, cờ thử nghiệm); bang tạo/tham gia/rời/chuyển; chiến bang đăng ký/đánh/kết quả/nhận rương; đảo nhả/chiếm mới; khóa/gỡ khóa tài khoản và khôi phục tài khoản; mã lỗi và nhóm độ trễ. Không có sự kiện kết thúc phiên hay xem shop.</p>
   <p>Sự kiện không có IP, tên hiển thị, ngày sinh hay nội dung chat, nhưng có mã tài khoản, bản băm thiết bị và mã phiên. Sự kiện thô giữ 13 tháng, sau đó chỉ còn tổng hợp ngày không có mã định danh. Sự kiện phía máy chủ (trận đánh, mua hàng, thao tác bang/chiến/đảo, lỗi) được ghi vào cùng bảng và không bị công tắc sử dụng dừng lại.</p>
   <p><strong>Công tắc sử dụng:</strong> Cài đặt → Tài khoản → Riêng tư → "Gửi dữ liệu cải thiện game" (mặc định bật). Tắt sẽ dừng sự kiện sử dụng từ client (bước hướng dẫn và nhóm độ trễ) và dừng nhật ký đo lường ẩn danh trên máy. Sự kiện phía máy chủ như trận đánh, mua hàng, thao tác bang/chiến và lỗi vẫn tiếp tục; chúng là một phần dữ liệu trò chơi của tài khoản.</p>
 </section>
@@ -514,6 +526,8 @@
     <dd>13 tháng, sau đó chỉ còn tổng hợp ngày không có mã định danh.</dd>
     <dt>Hồ sơ mua hàng</dt>
     <dd><code>iap_purchases</code>: trong khi tài khoản còn; sau khi xóa, dưới một mã tombstone ngẫu nhiên trong 5 năm (mặc định 1825 ngày), rồi một job hằng ngày xóa. Các dòng tiền trong <code>transaction_log</code> và <code>lucbao_ledger</code> cũng được giữ vô thời hạn dưới tombstone để kế toán và không bị job đó xóa.</dd>
+    <dt>Dữ liệu đo lường mua hàng của Unity IAP</dt>
+    <dd>Chúng tôi không lưu. Unity Technologies nhận khi bạn bắt đầu mua và giữ theo điều khoản Developer Data của Unity. Chúng tôi có thể chuyển yêu cầu xóa; cài đặt Unity Developer Data ở cấp dự án có thể tắt việc gửi.</dd>
     <dt>Dòng mạng và thiết bị, phiên đăng nhập</dt>
     <dd>Mỗi mạng/thiết bị từng gặp một dòng, kèm ngày gặp gần nhất, trong khi tài khoản còn; bộ chống tài khoản phụ chỉ so các dòng trong 7 ngày gần nhất. Phiên: 30 ngày mỗi mã, 10 mã mới nhất. Tất cả bị xóa cùng tài khoản.</dd>
     <dt>Hồ sơ khóa và chặn thiết bị</dt>
@@ -551,6 +565,7 @@
     <li><strong>Chúng tôi</strong>, nhà phát triển cá nhân phát hành Godsiege, cho hỗ trợ, an toàn, kiểm duyệt và sửa lỗi. Quyền quản trị chỉ vào qua đường hầm riêng có khóa.</li>
     <li><strong>Các bên xử lý của chúng tôi:</strong> nhà cung cấp máy chủ ở Singapore, Cloudflare (bảo vệ lưu lượng) và nơi lưu sao lưu ngoài. Họ làm theo chỉ dẫn của chúng tôi.</li>
     <li><strong>Google Play Billing</strong> cho mua hàng, theo chính sách của Google. Chúng tôi nhận dữ liệu đơn hàng và xác minh mã mua hàng với Google; chúng tôi không bao giờ thấy thẻ của bạn.</li>
+    <li><strong>Unity Technologies</strong> cho các sự kiện mua hàng mà gói Unity IAP gửi khi bạn bắt đầu mua (sản phẩm, giá, mã đơn/mã mua hàng, thông tin thiết bị và app), theo khung Developer Data của Unity. Chúng tôi không nhận bản này.</li>
     <li><strong>Google Play Games</strong>, chỉ khi bạn liên kết: nhận serverAuthCode và trả lại mã người chơi; chúng tôi chỉ giữ bản băm.</li>
     <li><strong>Google Firebase Cloud Messaging</strong>, chỉ khi bật thông báo và bạn cho phép: nhận mã thông báo đẩy và nội dung thông báo để gửi tới điện thoại, với vai trò nhà cung cấp dịch vụ của chúng tôi, theo chính sách của Google.</li>
     <li><strong>Nakama</strong> chạy trên máy chủ của chúng tôi, không phải bên thứ ba. Đây là máy chủ xã hội cho bang, chat, cúp và thông báo chiến.</li>
@@ -627,6 +642,7 @@
   <p><strong>Những gì được giữ, và vì sao:</strong></p>
   <ul>
     <li><strong>Mua hàng:</strong> <code>iap_purchases</code> dưới một mã tombstone ngẫu nhiên trong 5 năm (1825 ngày), rồi job hằng ngày xóa. Lý do: thuế, hoàn tiền và kế toán.</li>
+    <li><strong>Dữ liệu đo lường mua hàng của Unity IAP:</strong> chúng tôi không giữ. Bản của Unity Technologies không bị quy trình xóa của chúng tôi xóa; xem mục 4.</li>
     <li><strong>Sổ tiền:</strong> các dòng <code>transaction_log</code> và <code>lucbao_ledger</code> dưới tombstone, để kế toán. Chúng được giữ vô thời hạn; job xóa hồ sơ mua hàng hiện không xóa các dòng này.</li>
     <li><strong>Lịch sử chiến bang và đảo:</strong> thành viên chiến, lượt đánh, kết quả, nhận rương, trận đảo và điểm bang tuần ở lại dưới tombstone. Bản save làng bị xóa, và các trường quân/kết quả trận cùng snapshot/lệnh/stream của trận đảo bị xóa ở nơi quá trình xóa làm được; snapshot căn cứ của thành viên chiến và các dòng lệnh/stream của lượt đánh chiến bang có thể còn lại. Các dòng này mang tombstone ngẫu nhiên, không mang mã tài khoản. Lý do: lịch sử game và công bằng cho bang kia.</li>
     <li><strong>Replay trận:</strong> mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày. Replay chỉ có bố cục, quân và lệnh, không có mã tài khoản hay tên. Lý do: lịch sử game.</li>
@@ -653,7 +669,7 @@
     <li><code>recovery-created.txt</code>: thời điểm tạo mã khôi phục.</li>
     <li><code>online.flag</code>: online có bật không (bản phát triển và playtest).</li>
     <li><code>telemetry/</code>: nhật ký ẩn danh trên máy (tối đa 7 ngày và 5 MB) gồm mã cài đặt ngẫu nhiên, mã phiên, tên sự kiện, tham số game, mẫu máy, RAM, hệ điều hành, kích thước/dpi màn hình, ngôn ngữ, phiên bản app và bản ghi lỗi đã lọc (loại ngoại lệ, dấu vân tay một chiều và tối đa 5 khung stack). Không bao giờ được gửi lên. Cùng công tắc với sự kiện sử dụng sẽ tắt nó; tắt cũng xóa thư mục.</li>
-    <li>Unity PlayerPrefs: mã cài đặt telemetry, thời điểm thấy lần đầu, cờ đồng ý và cờ sự kiện lần đầu.</li>
+    <li>Unity PlayerPrefs: mã cài đặt telemetry, thời điểm thấy lần đầu, cờ đồng ý và cờ sự kiện lần đầu, cùng mã cài đặt và mã phiên của Unity Services (<code>unity_connect.installation_id</code>, <code>unity_connect.session_id</code>) do gói IAP dùng. Game không đọc hai mã này.</li>
   </ul>
   <p>File trên máy của bản PC được liệt kê trong chính sách offline.</p>
   <p>Xóa tài khoản online không xóa các file này. Xóa dữ liệu của app hoặc gỡ game để xóa chúng.</p>
