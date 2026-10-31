@@ -220,7 +220,7 @@
     <dt>Raw usage events</dt>
     <dd>60 days, then daily totals without identifiers.</dd>
     <dt>Game command log and battle records</dt>
-    <dd>The command lines of the game log (what the game asked the server to do, with no premium-gem effect) are deleted after 14 days; the layout of a PvP base and the attack stream after 14 days, the defense history and closed battle tickets after 30 days, war and island replays after 16 days and closed island battles after 60 days. Lines that move premium gems and every money row are kept as described under purchase records.</dd>
+    <dd>The command and clock lines of the game log (what the game asked the server to do, including lines that only move gold, oil or dark water, but not lines that move premium gems) are deleted after 14 days, and only after a verified audit checkpoint of your village covers them (the checkpoint is a sealed copy of your village save with its totals; it is kept while the account exists and deleted with it). A slim record of each deleted command (account id, command id, time and the answer the server gave; no command text) stays 90 days so a repeated request is not applied twice. The attack stream of a PvP battle: 14 days after the battle. The frozen layout of a PvP base and the closed battle ticket: 14 and 30 days after the battle, and not before a verified checkpoint covers the battle's log lines. The defense history: 30 days. War and island replays: 16 days. Closed island battles: 60 days (kept longer while a Luc Bao line refers to them or a checkpoint does not yet cover their log lines). Battle, shop, purchase, war, island and chest log lines and every line that moves premium gems are kept, as described under purchase records. War history (war attacks, lineups with their base snapshots, war battle tickets) is kept as game history.</dd>
     <dt>Purchase records</dt>
     <dd><code>iap_purchases</code>: while the account exists; after deletion, under a random tombstone for 5 years (default 1825 days), then a daily job deletes them. <code>transaction_log</code> and <code>lucbao_ledger</code> money rows are also kept indefinitely under the tombstone for accounting and are not removed by that job.</dd>
     <dt>Unity IAP purchase telemetry</dt>
@@ -242,11 +242,11 @@
     <dt>Operator audit log</dt>
     <dd>Admin name, action, tombstone id/ticket hash, old and new values: kept indefinitely for legal and audit purposes.</dd>
     <dt>Job history</dt>
-    <dd>Job kind/scope, tombstone ref, status and last error: kept indefinitely for operations and debugging.</dd>
+    <dd>Job kind/scope, tombstone ref, status and last error: the hourly island sweeps and the one-shot ticket jobs are deleted 14 days after they finish; every other job row is kept indefinitely (it stops a scheduler from running a season or a week twice), for operations and debugging.</dd>
     <dt>Anti-cheat review rows</dt>
     <dd>Kind, war/island reference, clan ids, detail with tombstone ids: kept indefinitely for anti-cheat review.</dd>
     <dt>Battle replays</dt>
-    <dd>Battle id, replay/offense text, content version and created date: kept indefinitely for game history. Replays contain layout, troops and commands, no account id or name.</dd>
+    <dd>Battle id, replay/offense text, content version and created date: war and island replays are deleted 16 days after the battle (the replay routes stop serving at 14). Replays contain layout, troops and commands, no account id or name.</dd>
     <dt>Technical logs</dt>
     <dd>A short operational period, rotated on the host. They are not used for advertising.</dd>
     <dt>Offsite backups</dt>
@@ -342,7 +342,8 @@
     <li><strong>Unity IAP purchase telemetry:</strong> not held by us. Unity Technologies' copy is not deleted by our purge; see section 4.</li>
     <li><strong>Money ledger:</strong> <code>transaction_log</code> and <code>lucbao_ledger</code> rows under the tombstone, for accounting. They are kept indefinitely; the purchase-retention job does not remove these rows today.</li>
     <li><strong>War and island history:</strong> war members, attacks, results, chest claims, island battles and weekly clan points stay under the tombstone. The village save copy is cleared, and the battle army/result and island snapshot/command/stream fields are cleared where the purge can; war-member base snapshots and war-attack command/stream rows can remain. These rows carry a random tombstone, not your account id. Reason: game history and fairness for the other clan.</li>
-    <li><strong>Battle replays:</strong> battle id, replay/offense text, content version and date. Replays contain layout, troops and commands, no account id or name. Reason: game history.</li>
+    <li><strong>Battle replays:</strong> war and island replays are deleted 16 days after the battle; until then they hold battle id, replay/offense text, content version and date (layout, troops and commands, no account id or name). Reason: game history for the other players of that battle.</li>
+    <li><strong>Audit checkpoint and command ids:</strong> the sealed village copy used by the ledger audit and the slim command-id records are deleted with the account.</li>
     <li><strong>Deletion request log:</strong> a SHA-256 hash of the account id, a SHA-256 hash of the ticket, the dates, the status and the tombstone id. Reason: proof that we carried out the request and to avoid repeat requests.</li>
     <li><strong>Operator audit log:</strong> admin name, action, tombstone id/ticket hash and old/new values. Reason: legal and audit.</li>
     <li><strong>Job history:</strong> job kind/scope, tombstone ref, status and last error. Reason: operations and debugging.</li>
@@ -527,7 +528,7 @@
     <dt>Sự kiện sử dụng thô</dt>
     <dd>60 ngày, sau đó chỉ còn tổng hợp ngày không có mã định danh.</dd>
     <dt>Nhật ký lệnh game và hồ sơ trận</dt>
-    <dd>Các dòng lệnh trong nhật ký game (game yêu cầu máy chủ làm gì, không đổi ngọc cao cấp) bị xóa sau 14 ngày; bố cục căn cứ PvP và luồng lệnh tấn công sau 14 ngày, lịch sử phòng thủ và phiếu trận đã đóng sau 30 ngày, bản xem lại trận chiến bang và đảo sau 16 ngày, trận đảo đã đóng sau 60 ngày. Các dòng có đổi ngọc cao cấp và mọi dòng tiền được giữ như mô tả ở mục hồ sơ mua hàng.</dd>
+    <dd>Các dòng lệnh và dòng đồng hồ trong nhật ký game (game yêu cầu máy chủ làm gì, kể cả dòng chỉ đổi vàng, dầu hoặc Hắc Thủy, nhưng không phải dòng đổi ngọc cao cấp) bị xóa sau 14 ngày, và chỉ sau khi một điểm kiểm toán đã xác minh của làng bạn bao phủ chúng (điểm kiểm toán là bản sao niêm phong của bản save làng kèm tổng số; giữ trong khi tài khoản còn và xóa cùng tài khoản). Một bản ghi rút gọn cho mỗi lệnh đã xóa (mã tài khoản, mã lệnh, thời gian và câu trả lời của máy chủ; không có nội dung lệnh) được giữ 90 ngày để một yêu cầu gửi lại không bị áp dụng hai lần. Luồng lệnh tấn công PvP: 14 ngày sau trận. Bố cục căn cứ PvP đã đóng băng và phiếu trận đã đóng: 14 và 30 ngày sau trận, và không xóa trước khi một điểm kiểm toán đã xác minh bao phủ các dòng nhật ký của trận. Lịch sử phòng thủ: 30 ngày. Bản xem lại trận chiến bang và đảo: 16 ngày. Trận đảo đã đóng: 60 ngày (giữ lâu hơn khi một dòng Lục Bảo còn nhắc tới hoặc điểm kiểm toán chưa bao phủ dòng nhật ký của nó). Các dòng trận đánh, cửa hàng, mua hàng, chiến bang, đảo, rương và mọi dòng đổi ngọc cao cấp được giữ như mô tả ở mục hồ sơ mua hàng. Lịch sử chiến bang (lượt đánh, đội hình kèm snapshot căn cứ, phiếu trận chiến bang) được giữ làm lịch sử game.</dd>
     <dt>Hồ sơ mua hàng</dt>
     <dd><code>iap_purchases</code>: trong khi tài khoản còn; sau khi xóa, dưới một mã tombstone ngẫu nhiên trong 5 năm (mặc định 1825 ngày), rồi một job hằng ngày xóa. Các dòng tiền trong <code>transaction_log</code> và <code>lucbao_ledger</code> cũng được giữ vô thời hạn dưới tombstone để kế toán và không bị job đó xóa.</dd>
     <dt>Dữ liệu đo lường mua hàng của Unity IAP</dt>
@@ -549,11 +550,11 @@
     <dt>Nhật ký kiểm toán của người vận hành</dt>
     <dd>Tên quản trị viên, hành động, mã tombstone/băm mã yêu cầu, giá trị cũ và mới: giữ vô thời hạn cho mục đích pháp lý và kiểm toán.</dd>
     <dt>Lịch sử job</dt>
-    <dd>Loại/phạm vi job, mã tham chiếu tombstone, trạng thái và lỗi cuối: giữ vô thời hạn cho vận hành và gỡ lỗi.</dd>
+    <dd>Loại/phạm vi job, mã tham chiếu tombstone, trạng thái và lỗi cuối: job quét đảo theo giờ và job vé một lần bị xóa 14 ngày sau khi xong; các job còn lại giữ vô thời hạn (chúng ngăn bộ lập lịch chạy một mùa hoặc một tuần hai lần), cho vận hành và gỡ lỗi.</dd>
     <dt>Dòng xem xét chống gian lận</dt>
     <dd>Loại, mã trận/đảo, mã bang, chi tiết với mã tombstone: giữ vô thời hạn để xem xét chống gian lận.</dd>
     <dt>Replay trận đánh</dt>
-    <dd>Mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày tạo: giữ vô thời hạn cho lịch sử game. Replay chỉ có bố cục, quân và lệnh, không có mã tài khoản hay tên.</dd>
+    <dd>Mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày tạo: replay chiến bang và đảo bị xóa 16 ngày sau trận (route xem lại ngừng phục vụ ở 14 ngày). Replay chỉ có bố cục, quân và lệnh, không có mã tài khoản hay tên.</dd>
     <dt>Nhật ký kỹ thuật</dt>
     <dd>Một thời gian vận hành ngắn, được luân chuyển trên máy chủ. Không dùng cho quảng cáo.</dd>
     <dt>Sao lưu ngoài máy chủ</dt>
@@ -649,7 +650,8 @@
     <li><strong>Dữ liệu đo lường mua hàng của Unity IAP:</strong> chúng tôi không giữ. Bản của Unity Technologies không bị quy trình xóa của chúng tôi xóa; xem mục 4.</li>
     <li><strong>Sổ tiền:</strong> các dòng <code>transaction_log</code> và <code>lucbao_ledger</code> dưới tombstone, để kế toán. Chúng được giữ vô thời hạn; job xóa hồ sơ mua hàng hiện không xóa các dòng này.</li>
     <li><strong>Lịch sử chiến bang và đảo:</strong> thành viên chiến, lượt đánh, kết quả, nhận rương, trận đảo và điểm bang tuần ở lại dưới tombstone. Bản save làng bị xóa, và các trường quân/kết quả trận cùng snapshot/lệnh/stream của trận đảo bị xóa ở nơi quá trình xóa làm được; snapshot căn cứ của thành viên chiến và các dòng lệnh/stream của lượt đánh chiến bang có thể còn lại. Các dòng này mang tombstone ngẫu nhiên, không mang mã tài khoản. Lý do: lịch sử game và công bằng cho bang kia.</li>
-    <li><strong>Replay trận:</strong> mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày. Replay chỉ có bố cục, quân và lệnh, không có mã tài khoản hay tên. Lý do: lịch sử game.</li>
+    <li><strong>Replay trận:</strong> replay chiến bang và đảo bị xóa 16 ngày sau trận; trong thời gian đó có mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày (bố cục, quân và lệnh, không có mã tài khoản hay tên). Lý do: lịch sử game cho những người chơi khác của trận đó.</li>
+    <li><strong>Điểm kiểm toán và mã lệnh:</strong> bản sao làng niêm phong dùng cho kiểm toán sổ và các bản ghi mã lệnh rút gọn bị xóa cùng tài khoản.</li>
     <li><strong>Nhật ký yêu cầu xóa:</strong> băm SHA-256 của mã tài khoản, băm SHA-256 của mã yêu cầu, các ngày và mã tombstone. Lý do: bằng chứng đã thực hiện yêu cầu và tránh yêu cầu lặp.</li>
     <li><strong>Nhật ký kiểm toán:</strong> tên quản trị viên, hành động, mã tombstone/băm mã yêu cầu và giá trị cũ/mới. Lý do: pháp lý và kiểm toán.</li>
     <li><strong>Lịch sử job:</strong> loại/phạm vi job, mã tham chiếu tombstone, trạng thái và lỗi cuối. Lý do: vận hành và gỡ lỗi.</li>
