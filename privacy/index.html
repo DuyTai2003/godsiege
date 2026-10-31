@@ -133,11 +133,11 @@
   <p class="tag">Why: clan war and island fairness. Two accounts on one network are flagged for a human to review, never banned automatically. Required.</p>
 
   <h3>Country</h3>
-  <p>The store/billing country the app reports (Google Play Billing country code), or a store-signed proof when one exists. We do not use your IP to decide it, and it is not your exact location.</p>
+  <p>The country the app reports: the store/billing country when the store provides one (Google Play Billing country code, or a store-signed proof when one exists), otherwise the country you pick on the age screen. We do not use your IP to decide it, and it is not your exact location.</p>
   <p class="tag">Why: open the game only in supported countries; local law. Required.</p>
 
   <h3>Age band</h3>
-  <p>From the age screen: "13-13", "14-15", "16-17" or "18+", plus the date checked. A separate chat band ("13+" or "16+") is stored when you open chat. We do not store your birth year or month.</p>
+  <p>From the age screen: "13-13", "14-15", "16-17" or "18+", plus the date checked. A separate chat band ("13+" or "16+") is stored when you open chat. Until an account has an age band it is treated as the safest band (13-15: no world chat). We do not store your birth year or month.</p>
   <p class="tag">Why: age rules; world chat is 16+. Required.</p>
 
   <h3>Sign-in sessions</h3>
@@ -197,8 +197,8 @@
   <p class="tag">Why: get your village back on a new phone. Only if you create a code or link.</p>
 
   <h3>Display name</h3>
-  <p>The name you type (filtered). The current build has no name screen and does not send one; this row applies only if a later version adds it. Clanmates would also see your Town Hall level and trophies next to it.</p>
-  <p class="tag">Why: clans, clan lists, rankings. Optional.</p>
+  <p>The display name you choose (3–16 characters, filtered). The game asks for it once before your first chat message or clan action; you can change it later in Settings → Account. Other players see it in clan lists, clan chat, world chat and clan war rosters; clanmates also see your Town Hall level and trophies next to it. It is deleted with your account.</p>
+  <p class="tag">Why: chat, clans, clan lists, clan war. Optional — needed only for chat and clan features.</p>
 
   <p>The game does not ask for your real name, email address, phone number, contacts, precise location, photos, microphone, advertising id or date of birth. We do not store a raw IP address in the game database, and we do not run ads. The age screen sends your birth year (and optional month) only to check your age; we keep the age band and the check date, not your date of birth.</p>
 </section>
@@ -206,7 +206,7 @@
 <section id="why">
   <h2>3. Why we use it</h2>
   <p>Our own database; the game itself has no third-party analytics SDK. The purchase flow is the exception: Unity IAP sends its own purchase events to Unity Technologies (section 2); we do not receive that copy. Events: account created (country, age band); session start (created flag, and platform/app version only if the app sends them); tutorial step (step id, skipped yes/no); battles (type, stars, destruction, loot, trophies, duration); building and Town Hall upgrades; currency earned/spent (currency, source, amount); shop purchase start/complete/fail/refund (offer, price, gems, test flag); clan create/join/leave/transfer; war signup/attack/result/chest claim; island release/fresh claim; account ban/unban and account recovered; error codes and latency buckets. There is no session-end or shop-view event.</p>
-  <p>Events carry no IP, display name, birth date or chat text, but they do carry the account id, the device hash and a session id. Raw events are kept 13 months, then only daily totals without identifiers remain. Server facts (battles, purchases, clan/war/island actions, errors) are written to the same table and are not stopped by the usage switch.</p>
+  <p>Events carry no IP, display name, birth date or chat text, but they do carry the account id, the device hash and a session id. Raw events are kept 60 days, then only daily totals without identifiers remain. Server facts (battles, purchases, clan/war/island actions, errors) are written to the same table and are not stopped by the usage switch.</p>
   <p><strong>Usage switch:</strong> Settings → Account → Privacy → "Send gameplay statistics" (on by default). Off stops the client usage events (tutorial steps and latency buckets) and stops the local anonymous telemetry log. Server facts such as battles, purchases, clan/war actions and errors continue; they are part of your account's game records.</p>
 </section>
 
@@ -218,7 +218,9 @@
     <dt>Clan and world chat, chat reports, ended mutes</dt>
     <dd>Chat and ended mutes: 30 days. An open report is kept until a moderator closes it (then 30 days); a report can therefore be kept longer than 30 days.</dd>
     <dt>Raw usage events</dt>
-    <dd>13 months, then daily totals without identifiers.</dd>
+    <dd>60 days, then daily totals without identifiers.</dd>
+    <dt>Game command log and battle records</dt>
+    <dd>The command lines of the game log (what the game asked the server to do, with no premium-gem effect) are deleted after 14 days; the layout of a PvP base and the attack stream after 14 days, the defense history and closed battle tickets after 30 days, war and island replays after 16 days and closed island battles after 60 days. Lines that move premium gems and every money row are kept as described under purchase records.</dd>
     <dt>Purchase records</dt>
     <dd><code>iap_purchases</code>: while the account exists; after deletion, under a random tombstone for 5 years (default 1825 days), then a daily job deletes them. <code>transaction_log</code> and <code>lucbao_ledger</code> money rows are also kept indefinitely under the tombstone for accounting and are not removed by that job.</dd>
     <dt>Unity IAP purchase telemetry</dt>
@@ -321,7 +323,7 @@
     <li>the village and its save;</li>
     <li>sessions;</li>
     <li>country and age band;</li>
-    <li>the chat profile;</li>
+    <li>the chat profile and your display name;</li>
     <li>notes you posted on clan-war or island marks;</li>
     <li>all your chat lines in our database and in Nakama;</li>
     <li>chat reports about you; in reports you filed, the evidence about the other player stays but your comment and id are removed;</li>
@@ -511,7 +513,7 @@
 <section id="vi-why">
   <h2>3. Vì sao chúng tôi dùng dữ liệu</h2>
   <p>Cơ sở dữ liệu của chính chúng tôi; bản thân game không có SDK thống kê của bên thứ ba. Ngoại lệ là luồng mua hàng: Unity IAP gửi sự kiện mua hàng của nó cho Unity Technologies (mục 2); chúng tôi không nhận bản đó. Sự kiện: tạo tài khoản (quốc gia, nhóm tuổi); bắt đầu phiên (cờ tạo mới, và nền tảng/phiên bản app chỉ khi app gửi); bước hướng dẫn (mã bước, bỏ qua hay không); trận đánh (loại, sao, mức phá hủy, chiến lợi phẩm, cúp, thời lượng); nâng cấp công trình và Thị Chính; tài nguyên kiếm/tiêu (loại, nguồn, số lượng); mua hàng trong shop bắt đầu/hoàn tất/thất bại/hoàn tiền (ưu đãi, giá, Kim Cương, cờ thử nghiệm); bang tạo/tham gia/rời/chuyển; chiến bang đăng ký/đánh/kết quả/nhận rương; đảo nhả/chiếm mới; khóa/gỡ khóa tài khoản và khôi phục tài khoản; mã lỗi và nhóm độ trễ. Không có sự kiện kết thúc phiên hay xem shop.</p>
-  <p>Sự kiện không có IP, tên hiển thị, ngày sinh hay nội dung chat, nhưng có mã tài khoản, bản băm thiết bị và mã phiên. Sự kiện thô giữ 13 tháng, sau đó chỉ còn tổng hợp ngày không có mã định danh. Sự kiện phía máy chủ (trận đánh, mua hàng, thao tác bang/chiến/đảo, lỗi) được ghi vào cùng bảng và không bị công tắc sử dụng dừng lại.</p>
+  <p>Sự kiện không có IP, tên hiển thị, ngày sinh hay nội dung chat, nhưng có mã tài khoản, bản băm thiết bị và mã phiên. Sự kiện thô giữ 60 ngày, sau đó chỉ còn tổng hợp ngày không có mã định danh. Sự kiện phía máy chủ (trận đánh, mua hàng, thao tác bang/chiến/đảo, lỗi) được ghi vào cùng bảng và không bị công tắc sử dụng dừng lại.</p>
   <p><strong>Công tắc sử dụng:</strong> Cài đặt → Tài khoản → Riêng tư → "Gửi dữ liệu cải thiện game" (mặc định bật). Tắt sẽ dừng sự kiện sử dụng từ client (bước hướng dẫn và nhóm độ trễ) và dừng nhật ký đo lường ẩn danh trên máy. Sự kiện phía máy chủ như trận đánh, mua hàng, thao tác bang/chiến và lỗi vẫn tiếp tục; chúng là một phần dữ liệu trò chơi của tài khoản.</p>
 </section>
 
@@ -523,7 +525,9 @@
     <dt>Chat bang và thế giới, báo cáo chat, mute đã hết</dt>
     <dd>Chat và mute đã hết: 30 ngày. Báo cáo đang mở được giữ đến khi kiểm duyệt viên đóng (sau đó 30 ngày); vì vậy một báo cáo có thể được giữ lâu hơn 30 ngày.</dd>
     <dt>Sự kiện sử dụng thô</dt>
-    <dd>13 tháng, sau đó chỉ còn tổng hợp ngày không có mã định danh.</dd>
+    <dd>60 ngày, sau đó chỉ còn tổng hợp ngày không có mã định danh.</dd>
+    <dt>Nhật ký lệnh game và hồ sơ trận</dt>
+    <dd>Các dòng lệnh trong nhật ký game (game yêu cầu máy chủ làm gì, không đổi ngọc cao cấp) bị xóa sau 14 ngày; bố cục căn cứ PvP và luồng lệnh tấn công sau 14 ngày, lịch sử phòng thủ và phiếu trận đã đóng sau 30 ngày, bản xem lại trận chiến bang và đảo sau 16 ngày, trận đảo đã đóng sau 60 ngày. Các dòng có đổi ngọc cao cấp và mọi dòng tiền được giữ như mô tả ở mục hồ sơ mua hàng.</dd>
     <dt>Hồ sơ mua hàng</dt>
     <dd><code>iap_purchases</code>: trong khi tài khoản còn; sau khi xóa, dưới một mã tombstone ngẫu nhiên trong 5 năm (mặc định 1825 ngày), rồi một job hằng ngày xóa. Các dòng tiền trong <code>transaction_log</code> và <code>lucbao_ledger</code> cũng được giữ vô thời hạn dưới tombstone để kế toán và không bị job đó xóa.</dd>
     <dt>Dữ liệu đo lường mua hàng của Unity IAP</dt>
