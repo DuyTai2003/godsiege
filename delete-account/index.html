@@ -146,14 +146,14 @@
     <dd><code>transaction_log</code> and <code>lucbao_ledger</code> money rows stay under the tombstone indefinitely. The purchase-retention job does not remove these rows today. Reason: accounting.</dd>
     <dt>War and island history — kept indefinitely for game fairness</dt>
     <dd>War members, attacks, results, chest claims, island battles and weekly clan points stay under the tombstone. The village save copy is cleared, and the battle army/result and island snapshot/command/stream fields are cleared where the purge can; war-member base snapshots and war-attack command/stream rows can remain. These rows carry a random tombstone, not your account id. Reason: the other clan's game history and fair results.</dd>
-    <dt>Battle replays — kept indefinitely for game history</dt>
-    <dd>Battle id, replay/offense text, content version and date. Replays contain layout, troops and commands, no account id or name. Reason: game history.</dd>
+    <dt>Battle replays — 16 days</dt>
+    <dd>War and island replays are deleted 16 days after the battle; until then they hold battle id, replay/offense text, content version and date (layout, troops and commands, no account id or name). Reason: game history for the other players of that battle. The sealed village copy used by the ledger audit and the slim command-id records are deleted with your account.</dd>
     <dt>Deletion request log — kept indefinitely as proof</dt>
     <dd>A SHA-256 hash of the account id, a SHA-256 hash of the ticket, the request/grace/done dates, the status and the tombstone id. Reason: proof that we carried out the request and to avoid repeat requests.</dd>
     <dt>Operator audit log — kept indefinitely for legal and audit</dt>
     <dd>Admin name, action, tombstone id/ticket hash and old/new values.</dd>
-    <dt>Job history — kept indefinitely for operations</dt>
-    <dd>Job kind/scope, tombstone ref, status and last error. Reason: operations and debugging.</dd>
+    <dt>Job history — kept for operations</dt>
+    <dd>Job kind/scope, tombstone ref, status and last error. The hourly island sweeps and the one-shot ticket jobs are deleted 14 days after they finish; every other job row is kept indefinitely. Reason: operations and debugging.</dd>
     <dt>Anti-cheat review rows — kept indefinitely for fairness</dt>
     <dd>Kind, war/island reference, clan ids and detail with tombstone ids.</dd>
     <dt>Banned device — kept for anti-abuse</dt>
@@ -238,14 +238,14 @@
     <dd>Các dòng tiền trong <code>transaction_log</code> và <code>lucbao_ledger</code> ở lại dưới tombstone vô thời hạn. Job xóa hồ sơ mua hàng hiện không xóa các dòng này. Lý do: kế toán.</dd>
     <dt>Lịch sử chiến bang và đảo — giữ vô thời hạn để công bằng</dt>
     <dd>Thành viên chiến, lượt đánh, kết quả, nhận rương, trận đảo và điểm bang tuần ở lại dưới tombstone. Bản save làng bị xóa, và các trường quân/kết quả trận cùng snapshot/lệnh/stream của trận đảo bị xóa ở nơi quá trình xóa làm được; snapshot căn cứ của thành viên chiến và các dòng lệnh/stream của lượt đánh chiến bang có thể còn lại. Các dòng này mang tombstone ngẫu nhiên, không mang mã tài khoản. Lý do: lịch sử game và kết quả công bằng cho bang kia.</dd>
-    <dt>Replay trận — giữ vô thời hạn cho lịch sử game</dt>
-    <dd>Mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày. Replay chỉ có bố cục, quân và lệnh, không có mã tài khoản hay tên. Lý do: lịch sử game.</dd>
+    <dt>Replay trận — 16 ngày</dt>
+    <dd>Replay chiến bang và đảo bị xóa 16 ngày sau trận; trong thời gian đó có mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày (bố cục, quân và lệnh, không có mã tài khoản hay tên). Lý do: lịch sử game cho những người chơi khác của trận đó. Bản sao làng có niêm phong dùng cho kiểm toán sổ và các bản ghi mã lệnh rút gọn bị xóa cùng tài khoản của bạn.</dd>
     <dt>Nhật ký yêu cầu xóa — giữ vô thời hạn làm bằng chứng</dt>
     <dd>Băm SHA-256 của mã tài khoản, băm SHA-256 của mã yêu cầu, ngày yêu cầu/ân hạn/hoàn tất, trạng thái và mã tombstone. Lý do: bằng chứng đã thực hiện yêu cầu và tránh yêu cầu lặp.</dd>
     <dt>Nhật ký kiểm toán — giữ vô thời hạn cho pháp lý và kiểm toán</dt>
     <dd>Tên quản trị viên, hành động, mã tombstone/băm mã yêu cầu và giá trị cũ/mới.</dd>
-    <dt>Lịch sử job — giữ vô thời hạn cho vận hành</dt>
-    <dd>Loại/phạm vi job, mã tham chiếu tombstone, trạng thái và lỗi cuối. Lý do: vận hành và gỡ lỗi.</dd>
+    <dt>Lịch sử job — giữ cho vận hành</dt>
+    <dd>Loại/phạm vi job, mã tham chiếu tombstone, trạng thái và lỗi cuối. Job quét đảo theo giờ và job vé một lần bị xóa 14 ngày sau khi xong; các job còn lại giữ vô thời hạn. Lý do: vận hành và gỡ lỗi.</dd>
     <dt>Dòng xem xét chống gian lận — giữ vô thời hạn để công bằng</dt>
     <dd>Loại, mã trận/đảo, mã bang và chi tiết với mã tombstone.</dd>
     <dt>Thiết bị bị chặn — giữ để chống lạm dụng</dt>

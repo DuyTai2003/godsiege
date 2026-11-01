@@ -85,7 +85,7 @@
 <header>
   <p class="kicker">Godsiege · Online build</p>
   <h1>Privacy Policy</h1>
-  <p class="meta">Last updated: 31 October 2026.</p>
+  <p class="meta">Last updated: 1 November 2026.</p>
   <p class="meta">Effective date: 31 October 2026.</p>
   <p class="meta">Operator and publisher: the individual developer of Godsiege (Viet Nam).</p>
   <p class="meta">Contact: godsiege.support@gmail.com. This policy online: https://godsiege.io.vn/privacy/.</p>
@@ -144,6 +144,10 @@
   <p>A hash of the session token, its expiry and the account it belongs to. Each token lasts 30 days; we keep your newest 10.</p>
   <p class="tag">Why: keep you signed in; end a session on log out. Required.</p>
 
+  <h3>Play Integrity check (Android)</h3>
+  <p>When you sign in, buy, link or recover an account, create a clan, chat or donate in a clan, the Android app asks Google Play Integrity for a one-time token and sends it to our server. Our server sends the token to Google, and Google answers whether this is the genuine app from Google Play, whether the device passes Google's integrity check, and the app licence status. We keep only the result per sign-in session: a level ("verified" or "unverified"), a short reason code (for example "device_integrity" or "app_unrecognized") and the time of the check, linked to that session's token hash and your account id. To stop a token being used twice we also keep a one-way hash of each token already used, with no account id. We do not keep the token or Google's full answer.</p>
+  <p class="tag">Why: keep modified apps, bots and device farms away from purchases, chat and clans. Required on Android while the check is switched on; an unverified session can still play, but purchases, chat and some account and clan actions wait until a check passes.</p>
+
   <h3>Game records</h3>
   <p>Village, buildings, troops, resources, battles, battle commands, trophies and the resource/purchase ledger.</p>
   <p class="tag">Why: run the game, settle battles on the server, stop cheating, show rankings. Required.</p>
@@ -200,12 +204,20 @@
   <p>The display name you choose (3–16 characters, filtered). The game asks for it once before your first chat message or clan action; you can change it later in Settings → Account. Other players see it in clan lists, clan chat, world chat and clan war rosters; clanmates also see your Town Hall level and trophies next to it. It is deleted with your account.</p>
   <p class="tag">Why: chat, clans, clan lists, clan war. Optional — needed only for chat and clan features.</p>
 
+  <h3>Feedback (only if you send it)</h3>
+  <p>What you write in the in-game feedback form (up to 1,000 characters), the category you pick (bug, idea, balance, other), the game version and the phone model, with your account id and the time. Not stored: your network address, name or email.</p>
+  <p class="tag">Why: read your message, fix bugs and improve the game; to understand a bug report we may look at your account's game records. Optional — only when you press Send.</p>
+
+  <h3>Tester code (closed test only)</h3>
+  <p>A short code such as XX-ABCDE-FGHJK (a country code and 10 characters) that the game shows on the "not available in your region" screen, only in a country we have chosen for a closed test (none today; never Vietnam before its G1 licence). It is made from the hashed device id above with a secret key only our server has, cannot be turned back into it, and works only for that country. If you are an invited tester and send it to us, we add it to a tester list with a nickname we choose (never your name or email) and an end date (at most 120 days); the first time it lets you in, it is replaced by an entry for your account with the same end date. App store reviewers may instead get a one-time review pass from us (at most 5 accounts, at most 14 days); the accounts it lets in get the same kind of entry.</p>
+  <p class="tag">Why: let invited testers in a closed-test country, and the store's reviewers, use the game while that country is not open. Only if you are an invited tester and send us the code, or a store reviewer using our review pass.</p>
+
   <p>The game does not ask for your real name, email address, phone number, contacts, precise location, photos, microphone, advertising id or date of birth. We do not store a raw IP address in the game database, and we do not run ads. The age screen sends your birth year (and optional month) only to check your age; we keep the age band and the check date, not your date of birth.</p>
 </section>
 
 <section id="why">
   <h2>3. Why we use it</h2>
-  <p>Our own database; the game itself has no third-party analytics SDK. The purchase flow is the exception: Unity IAP sends its own purchase events to Unity Technologies (section 2); we do not receive that copy. Events: account created (country, age band); session start (created flag, and platform/app version only if the app sends them); tutorial step (step id, skipped yes/no); battles (type, stars, destruction, loot, trophies, duration); building and Town Hall upgrades; currency earned/spent (currency, source, amount); shop purchase start/complete/fail/refund (offer, price, gems, test flag); clan create/join/leave/transfer; war signup/attack/result/chest claim; island release/fresh claim; account ban/unban and account recovered; error codes and latency buckets. There is no session-end or shop-view event.</p>
+  <p>Our own database; the game itself has no third-party analytics SDK. The purchase flow is the exception: Unity IAP sends its own purchase events to Unity Technologies (section 2); we do not receive that copy. Events: account created (country, age band); session start (created flag, and platform/app version only if the app sends them); tutorial step (step id, skipped yes/no); battles (type, stars, destruction, loot, trophies, duration); building and Town Hall upgrades; currency earned/spent (currency, source, amount); shop purchase start/complete/fail/refund (offer, price, gems, test flag); clan create/join/leave/transfer; war signup/attack/result/chest claim; island release/fresh claim; account ban/unban and account recovered; feedback sent (category and length, never the text); error codes and latency buckets. There is no session-end or shop-view event.</p>
   <p>Events carry no IP, display name, birth date or chat text, but they do carry the account id, the device hash and a session id. Raw events are kept 60 days, then only daily totals without identifiers remain. Server facts (battles, purchases, clan/war/island actions, errors) are written to the same table and are not stopped by the usage switch.</p>
   <p><strong>Usage switch:</strong> Settings → Account → Privacy → "Send gameplay statistics" (on by default). Off stops the client usage events (tutorial steps and latency buckets) and stops the local anonymous telemetry log. Server facts such as battles, purchases, clan/war actions and errors continue; they are part of your account's game records.</p>
 </section>
@@ -235,6 +247,14 @@
     <dd>Until you log out of that device, are banned, delete the account, or turn all four switches off (all four off deletes the token). A token Google says is no longer valid is deleted by the server. Push queue records: 2 days; war-notice outbox: 3 days.</dd>
     <dt>Recovery code hash, device-moved note, Play Games link hash</dt>
     <dd>While the account exists; deleted with the account. A code is also deleted the moment it is used or replaced.</dd>
+    <dt>Play Integrity results and used-token hashes</dt>
+    <dd>The result of a session: until that session ends (log out, expiry, the newest-10 rule, a ban), then a daily job deletes it; all deleted with the account. Used-token hashes: at most one day, then deleted.</dd>
+    <dt>Clan donation requests and loans</dt>
+    <dd>Deleted 7 days after the request expires or the loan ends. The clan's merit ledger (who earned clan merit, and when) is kept as clan history, because it proves the clan's merit totals.</dd>
+    <dt>Feedback</dt>
+    <dd>90 days, then a daily job deletes it; sooner if the account is deleted.</dd>
+    <dt>Tester list entries (and review-pass entries)</dt>
+    <dd>Until the entry's end date (at most 120 days; a review pass at most 14), then deleted within 7 days; deleted with the account, including a code that came from your earlier phone. The operator audit line of an entry keeps only a tombstone after the account is deleted.</dd>
     <dt>Request counters</dt>
     <dd>In memory only, gone at restart.</dd>
     <dt>Deletion request log</dt>
@@ -264,6 +284,7 @@
     <li><strong>Google Play Billing</strong> for purchases, under Google's own policy. We receive the order data and verify the purchase token with Google; we never see your card.</li>
     <li><strong>Unity Technologies</strong> for the purchase events the Unity IAP package sends when you start a purchase (product, price, order id/purchase token, device and app info), under Unity's Developer Data framework. We do not receive this copy.</li>
     <li><strong>Google Play Games</strong>, only if you link it: it receives the serverAuthCode and returns your player id; we keep only its hash.</li>
+    <li><strong>Google Play Integrity</strong> on Android: Google creates the one-time token on your phone and decodes it for our server, as our service provider, under Google's own policy (section 2).</li>
     <li><strong>Google Firebase Cloud Messaging</strong>, only if push is on and you allow it: it receives your push token and the notification text to deliver it to your phone, as our service provider, under Google's own policy.</li>
     <li><strong>Nakama</strong> runs on our own server, not at a third party. It is the social server for clans, chat, trophies and war notices.</li>
     <li><strong>Other players see:</strong> your display name (if set), trophies, clan name/description, clan role and member list, battle results, your base layout when they attack you in PvP or clan war, your battle replays to your clan/opponents, your clan and world chat lines, and notes/flags you post.</li>
@@ -289,7 +310,7 @@
     <li><strong>EU / EEA / UK (GDPR / UK GDPR):</strong> the rights above, plus a complaint to your national authority. Our server is in Singapore; we collect your data directly from you in the game and process it there.</li>
     <li><strong>California (CCPA/CPRA) and other US states:</strong> right to know, delete and correct. We do not sell or share personal data for ads, so no "do not sell" opt-out is needed.</li>
     <li><strong>Brazil, South Korea, Japan, Canada, Australia, others:</strong> the same access, correction and deletion by email, and a complaint to your local authority.</li>
-    <li><strong>Vietnam:</strong> online play is not open there yet; this text will be updated before it opens.</li>
+    <li><strong>Vietnam:</strong> online play is not open there yet, and there is no closed test in Vietnam before the G1 licence (no Vietnamese tester codes). This text will be updated before it opens.</li>
   </ul>
 </section>
 
@@ -301,7 +322,7 @@
     <li>14+ in South Korea.</li>
     <li>World chat is 16+.</li>
   </ul>
-  <p>The age screen runs before an account is created. The server checks your country and age; if you are too young it refuses and no account is created and no age band is stored for you (a short technical log of the refusal may keep the error code and country, never your birth year). Online play is not open in every country; if your country is not open, the game says so and you can still play offline.</p>
+  <p>The age screen runs before an account is created. The server checks your country and age; if you are too young it refuses and no account is created and no age band is stored for you (a short technical log of the refusal may keep the error code and country, never your birth year). Online play is not open in every country; if your country is not open, the game says so and you cannot play it there yet (in a country we chose for a closed test, an invited tester sees a tester code to send us).</p>
   <p>We do not knowingly keep data about children below these ages. If you think a child has an account, write to godsiege.support@gmail.com and we delete it. The game sells real-money items; parents can use Google Play parental controls.</p>
 </section>
 
@@ -321,7 +342,7 @@
   <ul>
     <li>the account row and its random id;</li>
     <li>the village and its save;</li>
-    <li>sessions;</li>
+    <li>sessions and their Play Integrity results;</li>
     <li>country and age band;</li>
     <li>the chat profile and your display name;</li>
     <li>notes you posted on clan-war or island marks;</li>
@@ -341,7 +362,7 @@
     <li><strong>Purchases:</strong> <code>iap_purchases</code> under a random tombstone id for 5 years (1825 days), then a daily job deletes them. Reason: tax, refunds and accounting.</li>
     <li><strong>Unity IAP purchase telemetry:</strong> not held by us. Unity Technologies' copy is not deleted by our purge; see section 4.</li>
     <li><strong>Money ledger:</strong> <code>transaction_log</code> and <code>lucbao_ledger</code> rows under the tombstone, for accounting. They are kept indefinitely; the purchase-retention job does not remove these rows today.</li>
-    <li><strong>War and island history:</strong> war members, attacks, results, chest claims, island battles and weekly clan points stay under the tombstone. The village save copy is cleared, and the battle army/result and island snapshot/command/stream fields are cleared where the purge can; war-member base snapshots and war-attack command/stream rows can remain. These rows carry a random tombstone, not your account id. Reason: game history and fairness for the other clan.</li>
+    <li><strong>War and island history:</strong> war members, attacks, results, chest claims, island battles and weekly clan points stay under the tombstone. The village save copy is cleared, and the battle army/result and island snapshot/command/stream fields are cleared where the purge can (the frozen layout of an island you held stays only while another player's battle on it is not yet covered by that player's audit checkpoint, then a daily job clears it); war-member base snapshots and war-attack command/stream rows can remain. These rows carry a random tombstone, not your account id. Reason: game history and fairness for the other clan.</li>
     <li><strong>Battle replays:</strong> war and island replays are deleted 16 days after the battle; until then they hold battle id, replay/offense text, content version and date (layout, troops and commands, no account id or name). Reason: game history for the other players of that battle.</li>
     <li><strong>Audit checkpoint and command ids:</strong> the sealed village copy used by the ledger audit and the slim command-id records are deleted with the account.</li>
     <li><strong>Deletion request log:</strong> a SHA-256 hash of the account id, a SHA-256 hash of the ticket, the dates, the status and the tombstone id. Reason: proof that we carried out the request and to avoid repeat requests.</li>
@@ -393,7 +414,7 @@
 <header>
   <p class="kicker">Godsiege · Bản online</p>
   <h1>Chính sách quyền riêng tư</h1>
-  <p class="meta">Cập nhật lần cuối: 31/10/2026.</p>
+  <p class="meta">Cập nhật lần cuối: 01/11/2026.</p>
   <p class="meta">Ngày có hiệu lực: 31 tháng 10 năm 2026.</p>
   <p class="meta">Người vận hành và phát hành: nhà phát triển cá nhân của Godsiege (Việt Nam).</p>
   <p class="meta">Liên hệ: godsiege.support@gmail.com. Trang này: https://godsiege.io.vn/privacy/.</p>
@@ -452,6 +473,10 @@
   <p>Một bản băm của mã phiên, thời điểm hết hạn và tài khoản sở hữu. Mỗi mã có hạn 30 ngày; chúng tôi giữ 10 mã mới nhất.</p>
   <p class="tag">Vì sao: giữ bạn đăng nhập; kết thúc phiên khi đăng xuất. Bắt buộc.</p>
 
+  <h3>Kiểm tra Play Integrity (Android)</h3>
+  <p>Khi bạn đăng nhập, mua hàng, liên kết hoặc khôi phục tài khoản, lập bang, chat hoặc góp quân trong bang, app Android xin Google Play Integrity một mã dùng một lần và gửi mã đó lên máy chủ của chúng tôi. Máy chủ gửi mã cho Google, và Google trả lời: đây có phải app thật tải từ Google Play không, thiết bị có qua bước kiểm tra toàn vẹn của Google không, và tình trạng bản quyền của app. Chúng tôi chỉ giữ kết quả theo từng phiên đăng nhập: một mức ("verified" hoặc "unverified"), một mã lý do ngắn (ví dụ "device_integrity" hoặc "app_unrecognized") và thời điểm kiểm tra, gắn với bản băm mã phiên đó và mã tài khoản của bạn. Để một mã không bị dùng hai lần, chúng tôi cũng giữ bản băm một chiều của mỗi mã đã dùng, không kèm mã tài khoản. Chúng tôi không giữ mã đó hay toàn bộ câu trả lời của Google.</p>
+  <p class="tag">Vì sao: chặn app bị sửa, bot và trại thiết bị khỏi mua hàng, chat và bang. Bắt buộc trên Android khi bước kiểm tra được bật; phiên chưa xác minh vẫn chơi được, nhưng mua hàng, chat và một số thao tác tài khoản và bang phải chờ đến khi một lần kiểm tra đạt.</p>
+
   <h3>Dữ liệu trò chơi</h3>
   <p>Làng, công trình, quân, tài nguyên, trận đánh, lệnh trận, cúp và sổ tài nguyên/mua hàng.</p>
   <p class="tag">Vì sao: chạy game, xử lý trận trên máy chủ, chống gian lận, hiện bảng xếp hạng. Bắt buộc.</p>
@@ -505,15 +530,23 @@
   <p class="tag">Vì sao: lấy lại làng khi đổi điện thoại. Chỉ khi bạn tạo mã hoặc liên kết.</p>
 
   <h3>Tên hiển thị</h3>
-  <p>Tên bạn nhập (đã lọc). Bản hiện tại chưa có màn hình đặt tên và không gửi tên; dòng này chỉ áp dụng nếu bản sau có thêm. Thành viên bang sẽ thấy cả cấp Thị Chính và cúp của bạn bên cạnh tên.</p>
-  <p class="tag">Vì sao: bang hội, danh sách bang, bảng xếp hạng. Tùy chọn.</p>
+  <p>Tên hiển thị bạn chọn (3–16 ký tự, đã lọc). Game hỏi tên một lần trước tin nhắn chat hoặc thao tác bang đầu tiên; bạn có thể đổi sau trong Cài đặt → Tài khoản. Người chơi khác thấy tên trong danh sách bang, chat bang, chat thế giới và đội hình chiến bang; thành viên bang thấy cả cấp Thị Chính và cúp của bạn bên cạnh tên. Tên bị xóa cùng tài khoản.</p>
+  <p class="tag">Vì sao: chat, bang hội, danh sách bang, chiến bang. Tùy chọn — chỉ cần cho chat và bang hội.</p>
+
+  <h3>Góp ý (chỉ khi bạn gửi)</h3>
+  <p>Nội dung bạn viết trong ô Góp ý của game (tối đa 1.000 ký tự), loại góp ý bạn chọn (lỗi, ý tưởng, cân bằng, khác), phiên bản game và dòng điện thoại, kèm mã tài khoản và thời điểm gửi. Không lưu: địa chỉ mạng, tên hay email của bạn.</p>
+  <p class="tag">Vì sao: đọc góp ý, sửa lỗi và làm game tốt hơn; để hiểu lỗi bạn báo, chúng tôi có thể xem dữ liệu game của tài khoản. Tùy chọn — chỉ khi bạn bấm Gửi.</p>
+
+  <h3>Mã thử nghiệm (chỉ khi thử nghiệm kín)</h3>
+  <p>Một mã ngắn như XX-ABCDE-FGHJK (mã nước và 10 ký tự) mà game hiện trên màn hình "chưa mở ở khu vực của bạn", chỉ ở nước chúng tôi chọn cho thử nghiệm kín (hiện chưa có nước nào; Việt Nam không có trước khi có giấy phép G1). Mã được làm từ mã máy đã băm ở trên bằng một khóa bí mật chỉ máy chủ của chúng tôi có, không thể đổi ngược lại và chỉ dùng được cho nước đó. Nếu bạn là người thử nghiệm được mời và gửi mã cho chúng tôi, chúng tôi thêm mã vào danh sách người thử nghiệm với một biệt danh do chúng tôi đặt (không bao giờ là tên hay email của bạn) và một ngày kết thúc (tối đa 120 ngày); lần đầu mã cho bạn vào, nó được thay bằng một mục gắn với tài khoản của bạn, cùng ngày kết thúc. Người duyệt của cửa hàng ứng dụng có thể nhận từ chúng tôi một mã duyệt riêng (tối đa 5 tài khoản, tối đa 14 ngày); các tài khoản vào bằng mã đó cũng có một mục như vậy.</p>
+  <p class="tag">Vì sao: cho người thử nghiệm được mời ở nước thử nghiệm kín và người duyệt của cửa hàng dùng game khi nước đó chưa mở. Chỉ khi bạn là người thử nghiệm được mời và gửi mã cho chúng tôi, hoặc là người duyệt của cửa hàng dùng mã duyệt của chúng tôi.</p>
 
   <p>Game không hỏi tên thật, email, số điện thoại, danh bạ, vị trí chính xác, ảnh, micro, mã quảng cáo hay ngày sinh. Chúng tôi không lưu địa chỉ IP thô trong cơ sở dữ liệu game và không chạy quảng cáo. Màn hình tuổi chỉ gửi năm sinh (và tháng sinh không bắt buộc) để kiểm tra tuổi; chúng tôi giữ nhóm tuổi và ngày kiểm tra, không giữ ngày sinh.</p>
 </section>
 
 <section id="vi-why">
   <h2>3. Vì sao chúng tôi dùng dữ liệu</h2>
-  <p>Cơ sở dữ liệu của chính chúng tôi; bản thân game không có SDK thống kê của bên thứ ba. Ngoại lệ là luồng mua hàng: Unity IAP gửi sự kiện mua hàng của nó cho Unity Technologies (mục 2); chúng tôi không nhận bản đó. Sự kiện: tạo tài khoản (quốc gia, nhóm tuổi); bắt đầu phiên (cờ tạo mới, và nền tảng/phiên bản app chỉ khi app gửi); bước hướng dẫn (mã bước, bỏ qua hay không); trận đánh (loại, sao, mức phá hủy, chiến lợi phẩm, cúp, thời lượng); nâng cấp công trình và Thị Chính; tài nguyên kiếm/tiêu (loại, nguồn, số lượng); mua hàng trong shop bắt đầu/hoàn tất/thất bại/hoàn tiền (ưu đãi, giá, Kim Cương, cờ thử nghiệm); bang tạo/tham gia/rời/chuyển; chiến bang đăng ký/đánh/kết quả/nhận rương; đảo nhả/chiếm mới; khóa/gỡ khóa tài khoản và khôi phục tài khoản; mã lỗi và nhóm độ trễ. Không có sự kiện kết thúc phiên hay xem shop.</p>
+  <p>Cơ sở dữ liệu của chính chúng tôi; bản thân game không có SDK thống kê của bên thứ ba. Ngoại lệ là luồng mua hàng: Unity IAP gửi sự kiện mua hàng của nó cho Unity Technologies (mục 2); chúng tôi không nhận bản đó. Sự kiện: tạo tài khoản (quốc gia, nhóm tuổi); bắt đầu phiên (cờ tạo mới, và nền tảng/phiên bản app chỉ khi app gửi); bước hướng dẫn (mã bước, bỏ qua hay không); trận đánh (loại, sao, mức phá hủy, chiến lợi phẩm, cúp, thời lượng); nâng cấp công trình và Thị Chính; tài nguyên kiếm/tiêu (loại, nguồn, số lượng); mua hàng trong shop bắt đầu/hoàn tất/thất bại/hoàn tiền (ưu đãi, giá, Kim Cương, cờ thử nghiệm); bang tạo/tham gia/rời/chuyển; chiến bang đăng ký/đánh/kết quả/nhận rương; đảo nhả/chiếm mới; khóa/gỡ khóa tài khoản và khôi phục tài khoản; đã gửi góp ý (loại và độ dài, không bao giờ có nội dung); mã lỗi và nhóm độ trễ. Không có sự kiện kết thúc phiên hay xem shop.</p>
   <p>Sự kiện không có IP, tên hiển thị, ngày sinh hay nội dung chat, nhưng có mã tài khoản, bản băm thiết bị và mã phiên. Sự kiện thô giữ 60 ngày, sau đó chỉ còn tổng hợp ngày không có mã định danh. Sự kiện phía máy chủ (trận đánh, mua hàng, thao tác bang/chiến/đảo, lỗi) được ghi vào cùng bảng và không bị công tắc sử dụng dừng lại.</p>
   <p><strong>Công tắc sử dụng:</strong> Cài đặt → Tài khoản → Riêng tư → "Gửi dữ liệu cải thiện game" (mặc định bật). Tắt sẽ dừng sự kiện sử dụng từ client (bước hướng dẫn và nhóm độ trễ) và dừng nhật ký đo lường ẩn danh trên máy. Sự kiện phía máy chủ như trận đánh, mua hàng, thao tác bang/chiến và lỗi vẫn tiếp tục; chúng là một phần dữ liệu trò chơi của tài khoản.</p>
 </section>
@@ -543,6 +576,14 @@
     <dd>Cho đến khi bạn đăng xuất khỏi thiết bị đó, bị khóa, xóa tài khoản, hoặc tắt cả 4 công tắc (tắt cả 4 sẽ xóa mã). Mã mà Google báo không còn hợp lệ sẽ bị máy chủ xóa. Bản ghi hàng đợi đẩy: 2 ngày; hàng đợi thông báo chiến: 3 ngày.</dd>
     <dt>Bản băm mã khôi phục, ghi chú chuyển máy, bản băm liên kết Play Games</dt>
     <dd>Trong khi tài khoản còn; xóa cùng tài khoản. Mã cũng bị xóa ngay khi được dùng hoặc thay.</dd>
+    <dt>Kết quả Play Integrity và bản băm mã đã dùng</dt>
+    <dd>Kết quả của một phiên: đến khi phiên đó kết thúc (đăng xuất, hết hạn, quy tắc 10 mã mới nhất, bị khóa), sau đó job hằng ngày xóa; tất cả bị xóa cùng tài khoản. Bản băm mã đã dùng: tối đa một ngày, rồi bị xóa.</dd>
+    <dt>Yêu cầu góp quân và khoản cho mượn trong bang</dt>
+    <dd>Bị xóa 7 ngày sau khi yêu cầu hết hạn hoặc khoản mượn kết thúc. Sổ Công Đức của bang (ai nhận Công Đức, khi nào) được giữ làm lịch sử bang, vì nó chứng minh tổng Công Đức của bang.</dd>
+    <dt>Góp ý</dt>
+    <dd>90 ngày, sau đó job hằng ngày xóa; xóa sớm hơn nếu tài khoản bị xóa.</dd>
+    <dt>Danh sách người thử nghiệm (và mục của mã duyệt)</dt>
+    <dd>Đến ngày kết thúc của mục đó (tối đa 120 ngày; mã duyệt tối đa 14 ngày), sau đó bị xóa trong vòng 7 ngày; xóa cùng tài khoản, kể cả mã đến từ điện thoại cũ của bạn. Sau khi tài khoản bị xóa, dòng nhật ký kiểm toán của mục đó chỉ còn mã tombstone.</dd>
     <dt>Bộ đếm yêu cầu</dt>
     <dd>Chỉ trong bộ nhớ, mất khi khởi động lại.</dd>
     <dt>Nhật ký yêu cầu xóa</dt>
@@ -572,6 +613,7 @@
     <li><strong>Google Play Billing</strong> cho mua hàng, theo chính sách của Google. Chúng tôi nhận dữ liệu đơn hàng và xác minh mã mua hàng với Google; chúng tôi không bao giờ thấy thẻ của bạn.</li>
     <li><strong>Unity Technologies</strong> cho các sự kiện mua hàng mà gói Unity IAP gửi khi bạn bắt đầu mua (sản phẩm, giá, mã đơn/mã mua hàng, thông tin thiết bị và app), theo khung Developer Data của Unity. Chúng tôi không nhận bản này.</li>
     <li><strong>Google Play Games</strong>, chỉ khi bạn liên kết: nhận serverAuthCode và trả lại mã người chơi; chúng tôi chỉ giữ bản băm.</li>
+    <li><strong>Google Play Integrity</strong> trên Android: Google tạo mã dùng một lần trên điện thoại của bạn và giải mã nó cho máy chủ của chúng tôi, với vai trò nhà cung cấp dịch vụ, theo chính sách của Google (mục 2).</li>
     <li><strong>Google Firebase Cloud Messaging</strong>, chỉ khi bật thông báo và bạn cho phép: nhận mã thông báo đẩy và nội dung thông báo để gửi tới điện thoại, với vai trò nhà cung cấp dịch vụ của chúng tôi, theo chính sách của Google.</li>
     <li><strong>Nakama</strong> chạy trên máy chủ của chúng tôi, không phải bên thứ ba. Đây là máy chủ xã hội cho bang, chat, cúp và thông báo chiến.</li>
     <li><strong>Người chơi khác thấy:</strong> tên hiển thị (nếu đặt), cúp, tên/mô tả bang, chức vụ và danh sách thành viên bang, kết quả trận, bố cục căn cứ khi họ đánh bạn trong PvP hoặc bang chiến, replay trận của bạn cho bang/đối thủ, tin chat bang và thế giới, và ghi chú/cờ bạn đăng.</li>
@@ -597,7 +639,7 @@
     <li><strong>EU / EEA / Anh (GDPR / UK GDPR):</strong> các quyền trên, và khiếu nại với cơ quan quốc gia của bạn. Máy chủ ở Singapore; chúng tôi nhận dữ liệu trực tiếp từ bạn trong game và xử lý ở đó.</li>
     <li><strong>California (CCPA/CPRA) và các bang khác của Mỹ:</strong> quyền biết, xóa và sửa. Chúng tôi không bán hoặc chia sẻ dữ liệu cá nhân để quảng cáo, nên không cần lựa chọn "không bán".</li>
     <li><strong>Brazil, Hàn Quốc, Nhật Bản, Canada, Úc, các nước khác:</strong> cùng quyền truy cập, sửa và xóa qua email, và khiếu nại với cơ quan địa phương.</li>
-    <li><strong>Việt Nam:</strong> online chưa mở ở đó; văn bản này sẽ được cập nhật trước khi mở.</li>
+    <li><strong>Việt Nam:</strong> online chưa mở ở đó, và không có thử nghiệm kín ở Việt Nam trước khi có giấy phép G1 (không có mã thử nghiệm cho Việt Nam). Văn bản này sẽ được cập nhật trước khi mở.</li>
   </ul>
 </section>
 
@@ -609,7 +651,7 @@
     <li>14+ ở Hàn Quốc.</li>
     <li>Chat thế giới là 16+.</li>
   </ul>
-  <p>Màn hình tuổi chạy trước khi tạo tài khoản. Máy chủ kiểm tra quốc gia và tuổi; nếu quá nhỏ, máy chủ từ chối, không tạo tài khoản và không lưu nhóm tuổi cho bạn (nhật ký kỹ thuật ngắn về lần từ chối có thể giữ mã lỗi và quốc gia, không bao giờ giữ năm sinh). Online không mở ở mọi nước; nếu nước bạn chưa mở, game sẽ báo và bạn vẫn chơi offline được.</p>
+  <p>Màn hình tuổi chạy trước khi tạo tài khoản. Máy chủ kiểm tra quốc gia và tuổi; nếu quá nhỏ, máy chủ từ chối, không tạo tài khoản và không lưu nhóm tuổi cho bạn (nhật ký kỹ thuật ngắn về lần từ chối có thể giữ mã lỗi và quốc gia, không bao giờ giữ năm sinh). Online không mở ở mọi nước; nếu nước bạn chưa mở, game sẽ báo và bạn chưa chơi được ở đó (ở nước chúng tôi chọn cho thử nghiệm kín, người thử nghiệm được mời sẽ thấy một mã thử nghiệm để gửi cho chúng tôi).</p>
   <p>Chúng tôi không cố ý giữ dữ liệu của trẻ dưới các độ tuổi này. Nếu bạn nghĩ một trẻ em có tài khoản, viết tới godsiege.support@gmail.com và chúng tôi xóa. Game có bán vật phẩm bằng tiền thật; phụ huynh có thể dùng kiểm soát của phụ huynh trên Google Play.</p>
 </section>
 
@@ -629,7 +671,7 @@
   <ul>
     <li>dòng tài khoản và mã ngẫu nhiên;</li>
     <li>làng và save;</li>
-    <li>phiên đăng nhập;</li>
+    <li>phiên đăng nhập và kết quả Play Integrity của chúng;</li>
     <li>quốc gia và nhóm tuổi;</li>
     <li>hồ sơ chat;</li>
     <li>ghi chú bạn đăng trên cờ chiến bang/đảo;</li>
@@ -649,7 +691,7 @@
     <li><strong>Mua hàng:</strong> <code>iap_purchases</code> dưới một mã tombstone ngẫu nhiên trong 5 năm (1825 ngày), rồi job hằng ngày xóa. Lý do: thuế, hoàn tiền và kế toán.</li>
     <li><strong>Dữ liệu đo lường mua hàng của Unity IAP:</strong> chúng tôi không giữ. Bản của Unity Technologies không bị quy trình xóa của chúng tôi xóa; xem mục 4.</li>
     <li><strong>Sổ tiền:</strong> các dòng <code>transaction_log</code> và <code>lucbao_ledger</code> dưới tombstone, để kế toán. Chúng được giữ vô thời hạn; job xóa hồ sơ mua hàng hiện không xóa các dòng này.</li>
-    <li><strong>Lịch sử chiến bang và đảo:</strong> thành viên chiến, lượt đánh, kết quả, nhận rương, trận đảo và điểm bang tuần ở lại dưới tombstone. Bản save làng bị xóa, và các trường quân/kết quả trận cùng snapshot/lệnh/stream của trận đảo bị xóa ở nơi quá trình xóa làm được; snapshot căn cứ của thành viên chiến và các dòng lệnh/stream của lượt đánh chiến bang có thể còn lại. Các dòng này mang tombstone ngẫu nhiên, không mang mã tài khoản. Lý do: lịch sử game và công bằng cho bang kia.</li>
+    <li><strong>Lịch sử chiến bang và đảo:</strong> thành viên chiến, lượt đánh, kết quả, nhận rương, trận đảo và điểm bang tuần ở lại dưới tombstone. Bản save làng bị xóa, và các trường quân/kết quả trận cùng snapshot/lệnh/stream của trận đảo bị xóa ở nơi quá trình xóa làm được (bố cục đóng băng của một đảo bạn từng giữ chỉ ở lại khi trận của người chơi khác trên đảo đó chưa được điểm kiểm toán của người đó bao phủ, rồi job hằng ngày xóa nó); snapshot căn cứ của thành viên chiến và các dòng lệnh/stream của lượt đánh chiến bang có thể còn lại. Các dòng này mang tombstone ngẫu nhiên, không mang mã tài khoản. Lý do: lịch sử game và công bằng cho bang kia.</li>
     <li><strong>Replay trận:</strong> replay chiến bang và đảo bị xóa 16 ngày sau trận; trong thời gian đó có mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày (bố cục, quân và lệnh, không có mã tài khoản hay tên). Lý do: lịch sử game cho những người chơi khác của trận đó.</li>
     <li><strong>Điểm kiểm toán và mã lệnh:</strong> bản sao làng niêm phong dùng cho kiểm toán sổ và các bản ghi mã lệnh rút gọn bị xóa cùng tài khoản.</li>
     <li><strong>Nhật ký yêu cầu xóa:</strong> băm SHA-256 của mã tài khoản, băm SHA-256 của mã yêu cầu, các ngày và mã tombstone. Lý do: bằng chứng đã thực hiện yêu cầu và tránh yêu cầu lặp.</li>
