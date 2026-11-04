@@ -130,6 +130,9 @@
     <li>network and device link rows, and your device hash on the account;</li>
     <li>push tokens and notification switches;</li>
     <li>the recovery code hash and the Play Games link hash;</li>
+    <li>your PvP defense and revenge rows, the recorded replay of your PvP battles, and your opponent searches (and the reference to you in other players' searches);</li>
+    <li>your refund claim box, the recovery request ids, chat message ids and command request ids;</li>
+    <li>your login calendar, weekly goal and event progress rows;</li>
     <li>your clan membership — you leave your clan; the clan stays and its leadership passes to another member;</li>
     <li>the Nakama user.</li>
   </ul>
@@ -146,8 +149,10 @@
     <dd><code>transaction_log</code> and <code>lucbao_ledger</code> money rows stay under the tombstone indefinitely. The purchase-retention job does not remove these rows today. Reason: accounting.</dd>
     <dt>War and island history — kept indefinitely for game fairness</dt>
     <dd>War members, attacks, results, chest claims, island battles and weekly clan points stay under the tombstone. The village save copy is cleared, and the battle army/result and island snapshot/command/stream fields are cleared where the purge can; war-member base snapshots and war-attack command/stream rows can remain. These rows carry a random tombstone, not your account id. Reason: the other clan's game history and fair results.</dd>
+    <dt>PvP refunds and clawbacks — kept as money records</dt>
+    <dd>The refund rows (amounts, operator name and note, findings) and the pvp_refund / pvp_refund_claw ledger lines stay under the tombstone, with the tombstone in place of your id. Reason: a mis-grant can be undone and the books balance.</dd>
     <dt>Battle replays — 16 days</dt>
-    <dd>War and island replays are deleted 16 days after the battle; until then they hold battle id, replay/offense text, content version and date (layout, troops and commands, no account id or name). Reason: game history for the other players of that battle. The sealed village copy used by the ledger audit and the slim command-id records are deleted with your account.</dd>
+    <dd>War, island and PvP-defense replays are deleted 16 days after the battle; until then they hold battle id, replay/offense text, content version and date (layout, troops and commands, no account id or name). Reason: game history for the other players of that battle. The sealed village copy used by the ledger audit and the slim command-id records are deleted with your account.</dd>
     <dt>Deletion request log — kept indefinitely as proof</dt>
     <dd>A SHA-256 hash of the account id, a SHA-256 hash of the ticket, the request/grace/done dates, the status and the tombstone id. Reason: proof that we carried out the request and to avoid repeat requests.</dd>
     <dt>Operator audit log — kept indefinitely for legal and audit</dt>
@@ -222,6 +227,9 @@
     <li>các dòng liên kết mạng/thiết bị, và băm thiết bị trên tài khoản;</li>
     <li>mã thông báo đẩy và công tắc thông báo;</li>
     <li>băm mã khôi phục và băm liên kết Play Games;</li>
+    <li>các dòng phòng thủ và trả thù PvP của bạn, replay đã ghi của các trận PvP của bạn và các lượt tìm đối thủ của bạn (cùng tham chiếu tới bạn trong lượt tìm của người khác);</li>
+    <li>hộp nhận hoàn trả, mã yêu cầu khôi phục, mã tin nhắn chat và mã yêu cầu lệnh của bạn;</li>
+    <li>lịch đăng nhập, mục tiêu tuần và tiến độ sự kiện của bạn;</li>
     <li>tư cách thành viên bang — bạn rời bang; bang vẫn còn và chức bang chủ chuyển cho người khác;</li>
     <li>người dùng Nakama.</li>
   </ul>
@@ -238,8 +246,10 @@
     <dd>Các dòng tiền trong <code>transaction_log</code> và <code>lucbao_ledger</code> ở lại dưới tombstone vô thời hạn. Job xóa hồ sơ mua hàng hiện không xóa các dòng này. Lý do: kế toán.</dd>
     <dt>Lịch sử chiến bang và đảo — giữ vô thời hạn để công bằng</dt>
     <dd>Thành viên chiến, lượt đánh, kết quả, nhận rương, trận đảo và điểm bang tuần ở lại dưới tombstone. Bản save làng bị xóa, và các trường quân/kết quả trận cùng snapshot/lệnh/stream của trận đảo bị xóa ở nơi quá trình xóa làm được; snapshot căn cứ của thành viên chiến và các dòng lệnh/stream của lượt đánh chiến bang có thể còn lại. Các dòng này mang tombstone ngẫu nhiên, không mang mã tài khoản. Lý do: lịch sử game và kết quả công bằng cho bang kia.</dd>
+    <dt>Hoàn trả và thu hồi PvP — giữ như bản ghi tiền</dt>
+    <dd>Các dòng hoàn trả (số tiền, tên và ghi chú của người vận hành, các phát hiện) và các dòng sổ pvp_refund / pvp_refund_claw vẫn giữ dưới tombstone, với tombstone thay cho mã của bạn. Lý do: một khoản cấp nhầm có thể thu hồi và sổ sách cân.</dd>
     <dt>Replay trận — 16 ngày</dt>
-    <dd>Replay chiến bang và đảo bị xóa 16 ngày sau trận; trong thời gian đó có mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày (bố cục, quân và lệnh, không có mã tài khoản hay tên). Lý do: lịch sử game cho những người chơi khác của trận đó. Bản sao làng có niêm phong dùng cho kiểm toán sổ và các bản ghi mã lệnh rút gọn bị xóa cùng tài khoản của bạn.</dd>
+    <dd>Replay chiến bang, đảo và phòng thủ PvP bị xóa 16 ngày sau trận; trong thời gian đó có mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày (bố cục, quân và lệnh, không có mã tài khoản hay tên). Lý do: lịch sử game cho những người chơi khác của trận đó. Bản sao làng có niêm phong dùng cho kiểm toán sổ và các bản ghi mã lệnh rút gọn bị xóa cùng tài khoản của bạn.</dd>
     <dt>Nhật ký yêu cầu xóa — giữ vô thời hạn làm bằng chứng</dt>
     <dd>Băm SHA-256 của mã tài khoản, băm SHA-256 của mã yêu cầu, ngày yêu cầu/ân hạn/hoàn tất, trạng thái và mã tombstone. Lý do: bằng chứng đã thực hiện yêu cầu và tránh yêu cầu lặp.</dd>
     <dt>Nhật ký kiểm toán — giữ vô thời hạn cho pháp lý và kiểm toán</dt>

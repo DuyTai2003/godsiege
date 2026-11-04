@@ -85,7 +85,7 @@
 <header>
   <p class="kicker">Godsiege · Online build</p>
   <h1>Privacy Policy</h1>
-  <p class="meta">Last updated: 1 November 2026.</p>
+  <p class="meta">Last updated: 4 November 2026.</p>
   <p class="meta">Effective date: 31 October 2026.</p>
   <p class="meta">Operator and publisher: the individual developer of Godsiege (Viet Nam).</p>
   <p class="meta">Contact: godsiege.support@gmail.com. This policy online: https://godsiege.io.vn/privacy/.</p>
@@ -197,8 +197,24 @@
   <p class="tag">Why: keep bad actors out; a single ban never blocks a shared phone. Only after a ban.</p>
 
   <h3>Recovery code, device-moved note and Play Games link (hashes)</h3>
-  <p>If you press "Create recovery code", the game shows you a code once; we store only a one-way hash and the date it was made. Using the code on a new phone moves your account there, ends your old sessions and uses the code up. A note ("this old device id: its account moved") is kept so the old phone is told instead of silently starting a new account. If the phone you move to already had a village, that old village is left behind under a dead device identity and is not deleted; delete that account separately if you can still access it. If you link Google Play Games, the app sends Google's serverAuthCode to our server; we exchange it with Google for your Play Games player id and keep only a one-way hash of it and the link date. We never receive your name, email or friends.</p>
+  <p>If you press "Create recovery code", the game shows you a code once; we store only a one-way hash and the date it was made. Using the code on a new phone moves your account there, ends your old sessions and uses the code up. A note ("this old device id: its account moved") is kept so the old phone is told instead of silently starting a new account. If the phone you move to already had a village, that old village is left behind under a dead device identity and is not deleted; delete that account separately if you can still access it. If you link Google Play Games, the app sends Google's serverAuthCode to our server; we exchange it with Google for your Play Games player id and keep only a one-way hash of it and the link date. We never receive your name, email or friends. Recovery code details: the code is made on the server as the first 80 bits of an HMAC-SHA256 under a secret server key over your account id, the request id the app sent and a random 16-byte nonce. We keep the one-way hash of the code, and a request history for 24 hours (at most 20 rows, or your daily limit if higher; the newest row stays while its code is active): a SHA-256 of account id plus request id, the time, whether it replaced an older code, the nonce and the first 8 bytes of a hash of the key (never the key). The nonce lets a repeated request (a lost reply) inside 10 minutes show the same code again; after 10 minutes the nonce is erased (a sweep runs every 5 minutes), so the key and the database together can no longer recompute the code. The code itself is never written to our logs or database. Limits: 5 new codes and 5 recoveries per account per day; wrong codes are limited per address, per device and server-wide (5 wrong tries from one address or device in 15 minutes, then refused until the window ends).</p>
   <p class="tag">Why: get your village back on a new phone. Only if you create a code or link.</p>
+
+  <h3>PvP defense log, revenge and defense replay</h3>
+  <p>When another player attacks your base in PvP, the server writes one defense row: battle id, your account id and the attacker's account id, the time, the destruction percent, the gold, oil and dark water you lost, and the end of the shield you were given. If you take revenge, one revenge row is written (the defense's battle id, your id, the attacker's id, the revenge battle id, the time): only one revenge per defense, and only within 24 hours of the attack. The recorded run of your defense (your frozen base layout, the attacker's army and its commands) is kept so you can watch it. The defense list in the game shows you: the attacker's public display name (filtered; a neutral placeholder if none), the attacker's Town Hall level, stars, destruction percent, what you lost, your trophy change, the shield you gained, and whether a revenge or replay is still possible. It never shows the attacker's account id, device, or the end of any shield or guard of the attacker: the revenge button only says available, used, expired or unavailable.</p>
+  <p class="tag">Why: show you who hit you and what it cost, let you answer once, and let the server refuse a second revenge. Only if another player attacked you.</p>
+
+  <h3>Opponent searches (PvP finds)</h3>
+  <p>Each time you search for a PvP opponent (or skip one) the server stores one find row: a find id, your account id, the request id the app sent, the number of the search in your 24-hour window, the kind, the account id of the real player it showed you (empty for a bot), a random seed, the difficulty, whether it was a skip, the gold it cost, the created, expiry and closing times, the status, and the answer it sent you (the opponent's Town Hall level, a trophy band, the base layout, the possible loot and your next price). The listed player is not told and no other player can read it.</p>
+  <p class="tag">Why: count your searches and charge the right price, give a repeated request the same answer without charging twice, and let the nightly audit check the gold price you paid. Only if you search for PvP opponents.</p>
+
+  <h3>PvP refunds (cheating review)</h3>
+  <p>If our automatic review finds that a PvP battle against you was unfair (for example a colluding attacker), an operator can confirm a refund of what you lost. The server then writes a refund row (battle id, your id, the attacker's id, battle time, season, the gold, oil, dark water and trophies refunded, the operator's name, a written note, the findings of the review, the amounts the attacker could not cover, the time) and a claim box for you (what is left to claim, how many claims, state, an expiry 30 days later, times). The refund is paid only when you claim it, and it is taken back from what the attacker's battle credited, as ledger lines (kind pvp_refund for you, pvp_refund_claw for the attacker). You see only the amounts, the state and the expiry. You never see who the attacker was, and the operator's note (including an "override:" note that lifts an automatic block) is read only by staff. The attacker's own money history shows a clawback line without your identity.</p>
+  <p class="tag">Why: give players back what a cheater took, once and never more than was lost, and keep an audit trail of the money. Only if a refund is made for you or against you.</p>
+
+  <h3>Request ids and event progress</h3>
+  <p>Chat message ids: so that a resent chat message is not posted twice, the app sends a random id per message and the server stores your account id, the channel, that id, the message id and the time; no message text (the text is in the chat table, see section 4). Command ids: a slim record per pruned game command (account id, command id, time, the answer given; no command text) so a repeat is not applied twice. Event and login progress: the daily login calendar (how many days you claimed, the last day), the weekly goals (week, claims, tiers reached, tiers paid) and each live event (event id, points, day counters, late points, tiers reached and paid, config version, times). Rewards from these are ordinary ledger lines.</p>
+  <p class="tag">Why: stop double posts and double rewards, and keep your event progress. Chat ids and command ids are created by playing; progress only if you use the daily calendar or an event.</p>
 
   <h3>Display name</h3>
   <p>The display name you choose (3–16 characters, filtered). The game asks for it once before your first chat message or clan action; you can change it later in Settings → Account. Other players see it in clan lists, clan chat, world chat and clan war rosters; clanmates also see your Town Hall level and trophies next to it. It is deleted with your account.</p>
@@ -232,7 +248,7 @@
     <dt>Raw usage events</dt>
     <dd>60 days, then daily totals without identifiers.</dd>
     <dt>Game command log and battle records</dt>
-    <dd>The command and clock lines of the game log (what the game asked the server to do, including lines that only move gold, oil or dark water, but not lines that move premium gems) are deleted after 14 days, and only after a verified audit checkpoint of your village covers them (the checkpoint is a sealed copy of your village save with its totals; it is kept while the account exists and deleted with it). A slim record of each deleted command (account id, command id, time and the answer the server gave; no command text) stays 90 days so a repeated request is not applied twice. The attack stream of a PvP battle: 14 days after the battle. The frozen layout of a PvP base and the closed battle ticket: 14 and 30 days after the battle, and not before a verified checkpoint covers the battle's log lines. The defense history: 30 days. War and island replays: 16 days. Closed island battles: 60 days (kept longer while a Luc Bao line refers to them or a checkpoint does not yet cover their log lines). Battle, shop, purchase, war, island and chest log lines and every line that moves premium gems are kept, as described under purchase records. War history (war attacks, lineups with their base snapshots, war battle tickets) is kept as game history.</dd>
+    <dd>The command and clock lines of the game log (what the game asked the server to do, including lines that only move gold, oil or dark water, but not lines that move premium gems) are deleted after 14 days, and only after a verified audit checkpoint of your village covers them (the checkpoint is a sealed copy of your village save with its totals; it is kept while the account exists and deleted with it). A slim record of each deleted command (account id, command id, time and the answer the server gave; no command text) stays 90 days so a repeated request is not applied twice. The attack stream of a PvP battle: 14 days after the battle. The frozen layout of a PvP base and the closed battle ticket: 14 and 30 days after the battle, and not before a verified checkpoint covers the battle's log lines. The defense history and its revenge record: 30 days. Replays (war, island and the replay of a PvP defense): 16 days (a PvP defense replay is served for 14). Closed island battles: 60 days (kept longer while a Luc Bao line refers to them or a checkpoint does not yet cover their log lines). Battle, shop, purchase, war, island and chest log lines and every line that moves premium gems are kept, as described under purchase records. War history (war attacks, lineups with their base snapshots, war battle tickets) is kept as game history.</dd>
     <dt>Purchase records</dt>
     <dd><code>iap_purchases</code>: while the account exists; after deletion, under a random tombstone for 5 years (default 1825 days), then a daily job deletes them. <code>transaction_log</code> and <code>lucbao_ledger</code> money rows are also kept indefinitely under the tombstone for accounting and are not removed by that job.</dd>
     <dt>Unity IAP purchase telemetry</dt>
@@ -247,6 +263,18 @@
     <dd>Until you log out of that device, are banned, delete the account, or turn all four switches off (all four off deletes the token). A token Google says is no longer valid is deleted by the server. Push queue records: 2 days; war-notice outbox: 3 days.</dd>
     <dt>Recovery code hash, device-moved note, Play Games link hash</dt>
     <dd>While the account exists; deleted with the account. A code is also deleted the moment it is used or replaced.</dd>
+    <dt>PvP defense log and revenge</dt>
+    <dd>Defense rows and revenge rows: 30 days after the attack, then a daily job deletes them. The replay of a PvP defense: the game serves it for 14 days; the recorded text is deleted 16 days after the battle.</dd>
+    <dt>Opponent searches (finds)</dt>
+    <dd>16 days (the longer of the PvP battle-data days and the command-log days plus 2, so the audit can still find every search a price line lists), then a daily job deletes them.</dd>
+    <dt>PvP refunds</dt>
+    <dd>The refund rows (the money record) stay, as ledger lines do; the claim box is deleted 90 days after it is done or expired (a box still open expires after 30 days; a voided box stays so the caps can read it). The operator note and the findings stay with the refund row.</dd>
+    <dt>Recovery request ids</dt>
+    <dd>24 hours (the newest row stays while its code is active); the nonce in it is erased after 10 minutes. Deleted with the account.</dd>
+    <dt>Chat message ids</dt>
+    <dd>1 day, then a daily job deletes them. Deleted with the account.</dd>
+    <dt>Command request ids, event and login progress</dt>
+    <dd>Command request ids: 90 days. Login calendar, weekly goal and event progress rows: while the account exists, deleted with the account (the reward ledger lines stay as money records).</dd>
     <dt>Play Integrity results and used-token hashes</dt>
     <dd>The result of a session: until that session ends (log out, expiry, the newest-10 rule, a ban), then a daily job deletes it; all deleted with the account. Used-token hashes: at most one day, then deleted.</dd>
     <dt>Clan donation requests and loans</dt>
@@ -266,7 +294,7 @@
     <dt>Anti-cheat review rows</dt>
     <dd>Kind, war/island reference, clan ids, detail with tombstone ids: kept indefinitely for anti-cheat review.</dd>
     <dt>Battle replays</dt>
-    <dd>Battle id, replay/offense text, content version and created date: war and island replays are deleted 16 days after the battle (the replay routes stop serving at 14). Replays contain layout, troops and commands, no account id or name.</dd>
+    <dd>Battle id, replay/offense text, content version and created date: war, island and PvP-defense replays are deleted 16 days after the battle (the replay routes stop serving at 14). War and island replays contain layout, troops and commands, no account id or name; a PvP-defense replay is deleted with the account of either player.</dd>
     <dt>Technical logs</dt>
     <dd>A short operational period, rotated on the host. They are not used for advertising.</dd>
     <dt>Offsite backups</dt>
@@ -287,7 +315,7 @@
     <li><strong>Google Play Integrity</strong> on Android: Google creates the one-time token on your phone and decodes it for our server, as our service provider, under Google's own policy (section 2).</li>
     <li><strong>Google Firebase Cloud Messaging</strong>, only if push is on and you allow it: it receives your push token and the notification text to deliver it to your phone, as our service provider, under Google's own policy.</li>
     <li><strong>Nakama</strong> runs on our own server, not at a third party. It is the social server for clans, chat, trophies and war notices.</li>
-    <li><strong>Other players see:</strong> your display name (if set), trophies, clan name/description, clan role and member list, battle results, your base layout when they attack you in PvP or clan war, your battle replays to your clan/opponents, your clan and world chat lines, and notes/flags you post.</li>
+    <li><strong>Other players see:</strong> your display name (if set), trophies, clan name/description, clan role and member list, battle results, your base layout when they attack you in PvP or clan war, your battle replays to your clan/opponents, your clan and world chat lines, and notes/flags you post. If you defend, you see the attacker's display name and Town Hall level in your defense list (never the attacker's account id); the attacker does not see your defense list.</li>
     <li><strong>Authorities</strong>, if the law requires it.</li>
   </ul>
   <p>We do not sell your data and do not share it for advertising.</p>
@@ -353,6 +381,11 @@
     <li>network and device link rows;</li>
     <li>push tokens and switches;</li>
     <li>the recovery code hash and the Play Games link hash;</li>
+    <li>your PvP defense rows and revenge rows (whether you were the defender or the attacker, so the entry also leaves the other player's list), and the recorded replay of your PvP battles;</li>
+    <li>your opponent searches, and the reference to you in other players' searches (their copy of the answer is erased);</li>
+    <li>your refund claim box; the refund rows are kept as money records with your id replaced by the tombstone (see below);</li>
+    <li>the recovery request ids, chat message ids and command request ids;</li>
+    <li>your login calendar, weekly goal and event progress rows;</li>
     <li>your clan membership (you leave your clan; the clan stays and its leadership passes to another member);</li>
     <li>the Nakama user.</li>
   </ul>
@@ -363,7 +396,8 @@
     <li><strong>Unity IAP purchase telemetry:</strong> not held by us. Unity Technologies' copy is not deleted by our purge; see section 4.</li>
     <li><strong>Money ledger:</strong> <code>transaction_log</code> and <code>lucbao_ledger</code> rows under the tombstone, for accounting. They are kept indefinitely; the purchase-retention job does not remove these rows today.</li>
     <li><strong>War and island history:</strong> war members, attacks, results, chest claims, island battles and weekly clan points stay under the tombstone. The village save copy is cleared, and the battle army/result and island snapshot/command/stream fields are cleared where the purge can (the frozen layout of an island you held stays only while another player's battle on it is not yet covered by that player's audit checkpoint, then a daily job clears it); war-member base snapshots and war-attack command/stream rows can remain. These rows carry a random tombstone, not your account id. Reason: game history and fairness for the other clan.</li>
-    <li><strong>Battle replays:</strong> war and island replays are deleted 16 days after the battle; until then they hold battle id, replay/offense text, content version and date (layout, troops and commands, no account id or name). Reason: game history for the other players of that battle.</li>
+    <li><strong>PvP refunds and clawbacks:</strong> the refund rows (amounts, operator name and note, findings) and the pvp_refund / pvp_refund_claw ledger lines stay under the tombstone, with the tombstone in place of your id on whichever side you were. Reason: money records, so a mis-grant can be undone and the books balance.</li>
+    <li><strong>Battle replays:</strong> war, island and PvP-defense replays are deleted 16 days after the battle; until then they hold battle id, replay/offense text, content version and date (layout, troops and commands; war and island replays have no account id or name, a PvP-defense replay is deleted with either player's account). Reason: game history for the other players of that battle.</li>
     <li><strong>Audit checkpoint and command ids:</strong> the sealed village copy used by the ledger audit and the slim command-id records are deleted with the account.</li>
     <li><strong>Deletion request log:</strong> a SHA-256 hash of the account id, a SHA-256 hash of the ticket, the dates, the status and the tombstone id. Reason: proof that we carried out the request and to avoid repeat requests.</li>
     <li><strong>Operator audit log:</strong> admin name, action, tombstone id/ticket hash and old/new values. Reason: legal and audit.</li>
@@ -414,7 +448,7 @@
 <header>
   <p class="kicker">Godsiege · Bản online</p>
   <h1>Chính sách quyền riêng tư</h1>
-  <p class="meta">Cập nhật lần cuối: 01/11/2026.</p>
+  <p class="meta">Cập nhật lần cuối: 04/11/2026.</p>
   <p class="meta">Ngày có hiệu lực: 31 tháng 10 năm 2026.</p>
   <p class="meta">Người vận hành và phát hành: nhà phát triển cá nhân của Godsiege (Việt Nam).</p>
   <p class="meta">Liên hệ: godsiege.support@gmail.com. Trang này: https://godsiege.io.vn/privacy/.</p>
@@ -526,8 +560,24 @@
   <p class="tag">Vì sao: ngăn người xấu; một lần khóa không chặn cả điện thoại dùng chung. Chỉ sau khi bị khóa.</p>
 
   <h3>Mã khôi phục, ghi chú chuyển máy và liên kết Play Games (bản băm)</h3>
-  <p>Nếu bạn bấm "Tạo mã khôi phục", game hiện mã một lần; chúng tôi chỉ lưu bản băm một chiều và ngày tạo. Dùng mã trên điện thoại mới sẽ chuyển tài khoản sang đó, kết thúc phiên cũ và dùng hết mã. Một ghi chú ("mã thiết bị cũ này: tài khoản đã chuyển") được giữ để máy cũ được báo thay vì âm thầm tạo tài khoản mới. Nếu điện thoại bạn chuyển sang đã có làng, làng cũ đó bị bỏ lại dưới một danh tính thiết bị đã chết và không bị xóa; hãy xóa tài khoản đó riêng nếu bạn còn truy cập được. Nếu bạn liên kết Google Play Games, app gửi serverAuthCode của Google cho máy chủ; chúng tôi đổi với Google lấy mã người chơi Play Games và chỉ giữ bản băm một chiều cùng ngày liên kết. Chúng tôi không nhận tên, email hay bạn bè của bạn.</p>
+  <p>Nếu bạn bấm "Tạo mã khôi phục", game hiện mã một lần; chúng tôi chỉ lưu bản băm một chiều và ngày tạo. Dùng mã trên điện thoại mới sẽ chuyển tài khoản sang đó, kết thúc phiên cũ và dùng hết mã. Một ghi chú ("mã thiết bị cũ này: tài khoản đã chuyển") được giữ để máy cũ được báo thay vì âm thầm tạo tài khoản mới. Nếu điện thoại bạn chuyển sang đã có làng, làng cũ đó bị bỏ lại dưới một danh tính thiết bị đã chết và không bị xóa; hãy xóa tài khoản đó riêng nếu bạn còn truy cập được. Nếu bạn liên kết Google Play Games, app gửi serverAuthCode của Google cho máy chủ; chúng tôi đổi với Google lấy mã người chơi Play Games và chỉ giữ bản băm một chiều cùng ngày liên kết. Chúng tôi không nhận tên, email hay bạn bè của bạn. Chi tiết mã khôi phục: mã được tạo trên máy chủ là 80 bit đầu của HMAC-SHA256 dưới một khóa bí mật của máy chủ, trên mã tài khoản của bạn, mã yêu cầu app gửi và một nonce ngẫu nhiên 16 byte. Chúng tôi giữ bản băm một chiều của mã, và lịch sử yêu cầu trong 24 giờ (tối đa 20 dòng, hoặc giới hạn mỗi ngày nếu cao hơn; dòng mới nhất vẫn giữ khi mã còn hiệu lực): SHA-256 của mã tài khoản cộng mã yêu cầu, thời điểm, có thay mã cũ hay không, nonce và 8 byte đầu của bản băm khóa (không bao giờ là khóa). Nonce cho phép một yêu cầu lặp lại (mất phản hồi) trong 10 phút hiện lại cùng mã; sau 10 phút nonce bị xóa (cứ 5 phút quét một lần), nên khóa cộng cơ sở dữ liệu không còn tính lại được mã. Bản thân mã không bao giờ được ghi vào nhật ký hay cơ sở dữ liệu của chúng tôi. Giới hạn: 5 mã mới và 5 lần khôi phục mỗi tài khoản mỗi ngày; mã sai bị giới hạn theo địa chỉ, theo thiết bị và toàn máy chủ (5 lần sai từ một địa chỉ hoặc thiết bị trong 15 phút, sau đó bị từ chối đến hết cửa sổ).</p>
   <p class="tag">Vì sao: lấy lại làng khi đổi điện thoại. Chỉ khi bạn tạo mã hoặc liên kết.</p>
+
+  <h3>Nhật ký phòng thủ PvP, trả thù và replay phòng thủ</h3>
+  <p>Khi người chơi khác tấn công căn cứ của bạn trong PvP, máy chủ ghi một dòng phòng thủ: mã trận, mã tài khoản của bạn và của người tấn công, thời điểm, phần trăm phá hủy, số vàng, dầu và nước đen bạn mất, và thời điểm hết khiên bạn được tặng. Nếu bạn trả thù, một dòng trả thù được ghi (mã trận phòng thủ, mã của bạn, mã người tấn công, mã trận trả thù, thời điểm): mỗi lượt phòng thủ chỉ trả thù một lần, và chỉ trong 24 giờ sau cuộc tấn công. Lượt chạy đã ghi của trận phòng thủ (bố cục căn cứ đã đóng băng của bạn, quân của người tấn công và các lệnh) được giữ để bạn xem lại. Danh sách phòng thủ trong game hiện cho bạn: tên hiển thị công khai của người tấn công (đã lọc; có chỗ thay trung tính nếu không có), cấp Thị Chính của họ, số sao, phần trăm phá hủy, thứ bạn mất, thay đổi cúp, khiên bạn nhận, và trả thù hoặc xem lại còn khả dụng không. Game không bao giờ hiện mã tài khoản, thiết bị hay thời điểm hết khiên/bảo vệ của người tấn công: nút trả thù chỉ cho biết còn dùng được, đã dùng, hết hạn hoặc không khả dụng.</p>
+  <p class="tag">Vì sao: cho bạn biết ai đánh bạn và tốn gì, cho bạn đáp trả một lần, và để máy chủ từ chối lần trả thù thứ hai. Chỉ khi có người chơi khác tấn công bạn.</p>
+
+  <h3>Tìm đối thủ (PvP finds)</h3>
+  <p>Mỗi lần bạn tìm đối thủ PvP (hoặc bỏ qua một đối thủ), máy chủ lưu một dòng tìm: mã lượt tìm, mã tài khoản của bạn, mã yêu cầu app đã gửi, số thứ tự lượt tìm trong cửa sổ 24 giờ, loại, mã tài khoản của người chơi thật đã hiện cho bạn (trống nếu là bot), một seed ngẫu nhiên, độ khó, có phải bỏ qua không, số vàng đã tốn, thời điểm tạo, hết hạn và đóng, trạng thái, và câu trả lời đã gửi bạn (cấp Thị Chính của đối thủ, một dải cúp, bố cục căn cứ, chiến lợi phẩm có thể có và giá lần sau). Người chơi bị liệt kê không được báo và không người chơi nào khác đọc được.</p>
+  <p class="tag">Vì sao: đếm số lượt tìm và tính đúng giá, trả cùng một câu trả lời cho yêu cầu lặp lại mà không trừ tiền hai lần, và để kiểm toán hằng đêm kiểm tra giá vàng bạn đã trả. Chỉ khi bạn tìm đối thủ PvP.</p>
+
+  <h3>Hoàn trả PvP (xem xét gian lận)</h3>
+  <p>Nếu việc xem xét tự động của chúng tôi thấy một trận PvP đánh bạn là không công bằng (ví dụ kẻ tấn công thông đồng), người vận hành có thể xác nhận hoàn lại phần bạn đã mất. Máy chủ khi đó ghi một dòng hoàn trả (mã trận, mã của bạn, mã người tấn công, thời điểm trận, mùa, số vàng, dầu, nước đen và cúp hoàn lại, tên người vận hành, ghi chú bằng văn bản, các phát hiện của việc xem xét, số tiền người tấn công không thể bù, thời điểm) và một hộp nhận cho bạn (phần còn lại để nhận, số lần nhận, trạng thái, hạn 30 ngày sau, thời điểm). Khoản hoàn chỉ được trả khi bạn nhận, và được lấy lại từ phần trận của người tấn công đã được cộng, bằng các dòng sổ (loại pvp_refund cho bạn, pvp_refund_claw cho người tấn công). Bạn chỉ thấy số tiền, trạng thái và hạn. Bạn không bao giờ thấy người tấn công là ai, và ghi chú của người vận hành (kể cả ghi chú "override:" gỡ một chặn tự động) chỉ nhân viên đọc. Lịch sử tiền của người tấn công hiện một dòng thu hồi nhưng không có danh tính của bạn.</p>
+  <p class="tag">Vì sao: trả lại cho người chơi những gì kẻ gian lận lấy, một lần và không bao giờ nhiều hơn phần đã mất, và giữ dấu vết kiểm toán cho tiền. Chỉ khi có khoản hoàn cho bạn hoặc chống lại bạn.</p>
+
+  <h3>Mã yêu cầu và tiến độ sự kiện</h3>
+  <p>Mã tin nhắn chat: để tin chat gửi lại không bị đăng hai lần, app gửi một mã ngẫu nhiên cho mỗi tin và máy chủ lưu mã tài khoản của bạn, kênh, mã đó, mã tin nhắn và thời điểm; không có nội dung tin (nội dung nằm trong bảng chat, xem mục 4). Mã lệnh: một bản ghi mỏng cho mỗi lệnh game đã bị dọn (mã tài khoản, mã lệnh, thời điểm, câu trả lời đã đưa; không có nội dung lệnh) để một yêu cầu lặp không bị áp dụng hai lần. Tiến độ sự kiện và đăng nhập: lịch đăng nhập hằng ngày (bạn đã nhận bao nhiêu ngày, ngày cuối), mục tiêu hằng tuần (tuần, số lần nhận, các mốc đạt, các mốc đã trả) và mỗi sự kiện đang chạy (mã sự kiện, điểm, bộ đếm theo ngày, điểm trễ, mốc đạt và đã trả, phiên bản cấu hình, thời điểm). Phần thưởng từ các mục này là dòng sổ bình thường.</p>
+  <p class="tag">Vì sao: chống đăng đôi và thưởng đôi, và giữ tiến độ sự kiện của bạn. Mã chat và mã lệnh được tạo khi chơi; tiến độ chỉ khi bạn dùng lịch hằng ngày hoặc sự kiện.</p>
 
   <h3>Tên hiển thị</h3>
   <p>Tên hiển thị bạn chọn (3–16 ký tự, đã lọc). Game hỏi tên một lần trước tin nhắn chat hoặc thao tác bang đầu tiên; bạn có thể đổi sau trong Cài đặt → Tài khoản. Người chơi khác thấy tên trong danh sách bang, chat bang, chat thế giới và đội hình chiến bang; thành viên bang thấy cả cấp Thị Chính và cúp của bạn bên cạnh tên. Tên bị xóa cùng tài khoản.</p>
@@ -561,7 +611,7 @@
     <dt>Sự kiện sử dụng thô</dt>
     <dd>60 ngày, sau đó chỉ còn tổng hợp ngày không có mã định danh.</dd>
     <dt>Nhật ký lệnh game và hồ sơ trận</dt>
-    <dd>Các dòng lệnh và dòng đồng hồ trong nhật ký game (game yêu cầu máy chủ làm gì, kể cả dòng chỉ đổi vàng, dầu hoặc Hắc Thủy, nhưng không phải dòng đổi ngọc cao cấp) bị xóa sau 14 ngày, và chỉ sau khi một điểm kiểm toán đã xác minh của làng bạn bao phủ chúng (điểm kiểm toán là bản sao niêm phong của bản save làng kèm tổng số; giữ trong khi tài khoản còn và xóa cùng tài khoản). Một bản ghi rút gọn cho mỗi lệnh đã xóa (mã tài khoản, mã lệnh, thời gian và câu trả lời của máy chủ; không có nội dung lệnh) được giữ 90 ngày để một yêu cầu gửi lại không bị áp dụng hai lần. Luồng lệnh tấn công PvP: 14 ngày sau trận. Bố cục căn cứ PvP đã đóng băng và phiếu trận đã đóng: 14 và 30 ngày sau trận, và không xóa trước khi một điểm kiểm toán đã xác minh bao phủ các dòng nhật ký của trận. Lịch sử phòng thủ: 30 ngày. Bản xem lại trận chiến bang và đảo: 16 ngày. Trận đảo đã đóng: 60 ngày (giữ lâu hơn khi một dòng Lục Bảo còn nhắc tới hoặc điểm kiểm toán chưa bao phủ dòng nhật ký của nó). Các dòng trận đánh, cửa hàng, mua hàng, chiến bang, đảo, rương và mọi dòng đổi ngọc cao cấp được giữ như mô tả ở mục hồ sơ mua hàng. Lịch sử chiến bang (lượt đánh, đội hình kèm snapshot căn cứ, phiếu trận chiến bang) được giữ làm lịch sử game.</dd>
+    <dd>Các dòng lệnh và dòng đồng hồ trong nhật ký game (game yêu cầu máy chủ làm gì, kể cả dòng chỉ đổi vàng, dầu hoặc Hắc Thủy, nhưng không phải dòng đổi ngọc cao cấp) bị xóa sau 14 ngày, và chỉ sau khi một điểm kiểm toán đã xác minh của làng bạn bao phủ chúng (điểm kiểm toán là bản sao niêm phong của bản save làng kèm tổng số; giữ trong khi tài khoản còn và xóa cùng tài khoản). Một bản ghi rút gọn cho mỗi lệnh đã xóa (mã tài khoản, mã lệnh, thời gian và câu trả lời của máy chủ; không có nội dung lệnh) được giữ 90 ngày để một yêu cầu gửi lại không bị áp dụng hai lần. Luồng lệnh tấn công PvP: 14 ngày sau trận. Bố cục căn cứ PvP đã đóng băng và phiếu trận đã đóng: 14 và 30 ngày sau trận, và không xóa trước khi một điểm kiểm toán đã xác minh bao phủ các dòng nhật ký của trận. Lịch sử phòng thủ và dòng trả thù: 30 ngày. Replay (chiến bang, đảo và replay của một trận phòng thủ PvP): 16 ngày (replay phòng thủ PvP được phục vụ trong 14 ngày). Trận đảo đã đóng: 60 ngày (giữ lâu hơn khi một dòng Lục Bảo còn nhắc tới hoặc điểm kiểm toán chưa bao phủ dòng nhật ký của nó). Các dòng trận đánh, cửa hàng, mua hàng, chiến bang, đảo, rương và mọi dòng đổi ngọc cao cấp được giữ như mô tả ở mục hồ sơ mua hàng. Lịch sử chiến bang (lượt đánh, đội hình kèm snapshot căn cứ, phiếu trận chiến bang) được giữ làm lịch sử game.</dd>
     <dt>Hồ sơ mua hàng</dt>
     <dd><code>iap_purchases</code>: trong khi tài khoản còn; sau khi xóa, dưới một mã tombstone ngẫu nhiên trong 5 năm (mặc định 1825 ngày), rồi một job hằng ngày xóa. Các dòng tiền trong <code>transaction_log</code> và <code>lucbao_ledger</code> cũng được giữ vô thời hạn dưới tombstone để kế toán và không bị job đó xóa.</dd>
     <dt>Dữ liệu đo lường mua hàng của Unity IAP</dt>
@@ -576,6 +626,18 @@
     <dd>Cho đến khi bạn đăng xuất khỏi thiết bị đó, bị khóa, xóa tài khoản, hoặc tắt cả 4 công tắc (tắt cả 4 sẽ xóa mã). Mã mà Google báo không còn hợp lệ sẽ bị máy chủ xóa. Bản ghi hàng đợi đẩy: 2 ngày; hàng đợi thông báo chiến: 3 ngày.</dd>
     <dt>Bản băm mã khôi phục, ghi chú chuyển máy, bản băm liên kết Play Games</dt>
     <dd>Trong khi tài khoản còn; xóa cùng tài khoản. Mã cũng bị xóa ngay khi được dùng hoặc thay.</dd>
+    <dt>Nhật ký phòng thủ PvP và trả thù</dt>
+    <dd>Dòng phòng thủ và dòng trả thù: 30 ngày sau cuộc tấn công, sau đó job hằng ngày xóa. Replay của một trận phòng thủ PvP: game phục vụ trong 14 ngày; nội dung đã ghi bị xóa 16 ngày sau trận.</dd>
+    <dt>Lượt tìm đối thủ (finds)</dt>
+    <dd>16 ngày (số lớn hơn giữa số ngày dữ liệu trận PvP và số ngày nhật ký lệnh cộng 2, để kiểm toán vẫn tìm thấy mọi lượt tìm mà một dòng giá nêu), sau đó job hằng ngày xóa.</dd>
+    <dt>Hoàn trả PvP</dt>
+    <dd>Các dòng hoàn trả (bản ghi tiền) vẫn giữ, như các dòng sổ; hộp nhận bị xóa 90 ngày sau khi xong hoặc hết hạn (hộp còn mở hết hạn sau 30 ngày; hộp đã hủy vẫn giữ để các giới hạn đọc được). Ghi chú của người vận hành và các phát hiện nằm cùng dòng hoàn trả.</dd>
+    <dt>Mã yêu cầu khôi phục</dt>
+    <dd>24 giờ (dòng mới nhất vẫn giữ khi mã còn hiệu lực); nonce trong đó bị xóa sau 10 phút. Xóa cùng tài khoản.</dd>
+    <dt>Mã tin nhắn chat</dt>
+    <dd>1 ngày, sau đó job hằng ngày xóa. Xóa cùng tài khoản.</dd>
+    <dt>Mã yêu cầu lệnh, tiến độ sự kiện và đăng nhập</dt>
+    <dd>Mã yêu cầu lệnh: 90 ngày. Lịch đăng nhập, mục tiêu tuần và tiến độ sự kiện: trong khi tài khoản còn, xóa cùng tài khoản (các dòng sổ thưởng vẫn giữ như bản ghi tiền).</dd>
     <dt>Kết quả Play Integrity và bản băm mã đã dùng</dt>
     <dd>Kết quả của một phiên: đến khi phiên đó kết thúc (đăng xuất, hết hạn, quy tắc 10 mã mới nhất, bị khóa), sau đó job hằng ngày xóa; tất cả bị xóa cùng tài khoản. Bản băm mã đã dùng: tối đa một ngày, rồi bị xóa.</dd>
     <dt>Yêu cầu góp quân và khoản cho mượn trong bang</dt>
@@ -595,7 +657,7 @@
     <dt>Dòng xem xét chống gian lận</dt>
     <dd>Loại, mã trận/đảo, mã bang, chi tiết với mã tombstone: giữ vô thời hạn để xem xét chống gian lận.</dd>
     <dt>Replay trận đánh</dt>
-    <dd>Mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày tạo: replay chiến bang và đảo bị xóa 16 ngày sau trận (route xem lại ngừng phục vụ ở 14 ngày). Replay chỉ có bố cục, quân và lệnh, không có mã tài khoản hay tên.</dd>
+    <dd>Mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày tạo: replay chiến bang, đảo và phòng thủ PvP bị xóa 16 ngày sau trận (route xem lại ngừng phục vụ ở 14 ngày). Replay chiến bang và đảo chỉ có bố cục, quân và lệnh, không có mã tài khoản hay tên; replay phòng thủ PvP bị xóa cùng tài khoản của một trong hai người chơi.</dd>
     <dt>Nhật ký kỹ thuật</dt>
     <dd>Một thời gian vận hành ngắn, được luân chuyển trên máy chủ. Không dùng cho quảng cáo.</dd>
     <dt>Sao lưu ngoài máy chủ</dt>
@@ -616,7 +678,7 @@
     <li><strong>Google Play Integrity</strong> trên Android: Google tạo mã dùng một lần trên điện thoại của bạn và giải mã nó cho máy chủ của chúng tôi, với vai trò nhà cung cấp dịch vụ, theo chính sách của Google (mục 2).</li>
     <li><strong>Google Firebase Cloud Messaging</strong>, chỉ khi bật thông báo và bạn cho phép: nhận mã thông báo đẩy và nội dung thông báo để gửi tới điện thoại, với vai trò nhà cung cấp dịch vụ của chúng tôi, theo chính sách của Google.</li>
     <li><strong>Nakama</strong> chạy trên máy chủ của chúng tôi, không phải bên thứ ba. Đây là máy chủ xã hội cho bang, chat, cúp và thông báo chiến.</li>
-    <li><strong>Người chơi khác thấy:</strong> tên hiển thị (nếu đặt), cúp, tên/mô tả bang, chức vụ và danh sách thành viên bang, kết quả trận, bố cục căn cứ khi họ đánh bạn trong PvP hoặc bang chiến, replay trận của bạn cho bang/đối thủ, tin chat bang và thế giới, và ghi chú/cờ bạn đăng.</li>
+    <li><strong>Người chơi khác thấy:</strong> tên hiển thị (nếu đặt), cúp, tên/mô tả bang, chức vụ và danh sách thành viên bang, kết quả trận, bố cục căn cứ khi họ đánh bạn trong PvP hoặc bang chiến, replay trận của bạn cho bang/đối thủ, tin chat bang và thế giới, và ghi chú/cờ bạn đăng. Nếu bạn phòng thủ, bạn thấy tên hiển thị và cấp Thị Chính của người tấn công trong danh sách phòng thủ (không bao giờ là mã tài khoản của họ); người tấn công không thấy danh sách phòng thủ của bạn.</li>
     <li><strong>Cơ quan chức năng</strong>, nếu luật yêu cầu.</li>
   </ul>
   <p>Chúng tôi không bán dữ liệu và không chia sẻ dữ liệu để quảng cáo.</p>
@@ -682,6 +744,11 @@
     <li>dòng liên kết mạng/thiết bị;</li>
     <li>mã thông báo đẩy và công tắc;</li>
     <li>băm mã khôi phục và băm liên kết Play Games;</li>
+    <li>các dòng phòng thủ và trả thù PvP của bạn (dù bạn là người phòng thủ hay người tấn công, nên mục đó cũng biến khỏi danh sách của người chơi kia), và replay đã ghi của các trận PvP của bạn;</li>
+    <li>các lượt tìm đối thủ của bạn, và tham chiếu tới bạn trong lượt tìm của người khác (bản câu trả lời của họ bị xóa);</li>
+    <li>hộp nhận hoàn trả của bạn; các dòng hoàn trả được giữ như bản ghi tiền với mã của bạn thay bằng tombstone (xem dưới);</li>
+    <li>mã yêu cầu khôi phục, mã tin nhắn chat và mã yêu cầu lệnh;</li>
+    <li>lịch đăng nhập, mục tiêu tuần và tiến độ sự kiện của bạn;</li>
     <li>tư cách thành viên bang (bạn rời bang; bang vẫn còn và chức bang chủ chuyển cho người khác);</li>
     <li>người dùng Nakama.</li>
   </ul>
@@ -692,7 +759,8 @@
     <li><strong>Dữ liệu đo lường mua hàng của Unity IAP:</strong> chúng tôi không giữ. Bản của Unity Technologies không bị quy trình xóa của chúng tôi xóa; xem mục 4.</li>
     <li><strong>Sổ tiền:</strong> các dòng <code>transaction_log</code> và <code>lucbao_ledger</code> dưới tombstone, để kế toán. Chúng được giữ vô thời hạn; job xóa hồ sơ mua hàng hiện không xóa các dòng này.</li>
     <li><strong>Lịch sử chiến bang và đảo:</strong> thành viên chiến, lượt đánh, kết quả, nhận rương, trận đảo và điểm bang tuần ở lại dưới tombstone. Bản save làng bị xóa, và các trường quân/kết quả trận cùng snapshot/lệnh/stream của trận đảo bị xóa ở nơi quá trình xóa làm được (bố cục đóng băng của một đảo bạn từng giữ chỉ ở lại khi trận của người chơi khác trên đảo đó chưa được điểm kiểm toán của người đó bao phủ, rồi job hằng ngày xóa nó); snapshot căn cứ của thành viên chiến và các dòng lệnh/stream của lượt đánh chiến bang có thể còn lại. Các dòng này mang tombstone ngẫu nhiên, không mang mã tài khoản. Lý do: lịch sử game và công bằng cho bang kia.</li>
-    <li><strong>Replay trận:</strong> replay chiến bang và đảo bị xóa 16 ngày sau trận; trong thời gian đó có mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày (bố cục, quân và lệnh, không có mã tài khoản hay tên). Lý do: lịch sử game cho những người chơi khác của trận đó.</li>
+    <li><strong>Hoàn trả và thu hồi PvP:</strong> các dòng hoàn trả (số tiền, tên và ghi chú của người vận hành, các phát hiện) và các dòng sổ pvp_refund / pvp_refund_claw vẫn giữ dưới tombstone, với tombstone thay cho mã của bạn ở phía bạn đã đứng. Lý do: bản ghi tiền, để một khoản cấp nhầm có thể thu hồi và sổ sách cân.</li>
+    <li><strong>Replay trận:</strong> replay chiến bang, đảo và phòng thủ PvP bị xóa 16 ngày sau trận; trong thời gian đó có mã trận, nội dung replay/tấn công, phiên bản nội dung và ngày (bố cục, quân và lệnh; replay chiến bang và đảo không có mã tài khoản hay tên, replay phòng thủ PvP bị xóa cùng tài khoản của một trong hai người chơi). Lý do: lịch sử game cho những người chơi khác của trận đó.</li>
     <li><strong>Điểm kiểm toán và mã lệnh:</strong> bản sao làng niêm phong dùng cho kiểm toán sổ và các bản ghi mã lệnh rút gọn bị xóa cùng tài khoản.</li>
     <li><strong>Nhật ký yêu cầu xóa:</strong> băm SHA-256 của mã tài khoản, băm SHA-256 của mã yêu cầu, các ngày và mã tombstone. Lý do: bằng chứng đã thực hiện yêu cầu và tránh yêu cầu lặp.</li>
     <li><strong>Nhật ký kiểm toán:</strong> tên quản trị viên, hành động, mã tombstone/băm mã yêu cầu và giá trị cũ/mới. Lý do: pháp lý và kiểm toán.</li>
